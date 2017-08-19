@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-Stock Card | Release
+Supply Ledger | Release
 @stop
 @section('navbar')
 @include('layouts.navbar')
@@ -26,7 +26,7 @@ Stock Card | Release
 <div class="container-fluid" id="page-body">
 	<div class="col-md-offset-3 col-md-6 panel">
 		<div class="panel-body">
-			{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
+			{{ Form::open(['method'=>'post','route'=>array('supply.supplyledger.batch.release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
 			<legend><h3 class="text-muted">Batch Release</h3></legend>
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">

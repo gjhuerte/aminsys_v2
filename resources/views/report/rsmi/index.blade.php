@@ -57,6 +57,7 @@ RSMI
 						<th>Qty</th>
 						<th>Item Description</th>
 						<th>Unit Cost</th>
+						<th>Total Cost</th>
 						<th>UACS Object Code</th>
 					</tr>
 				</thead>
@@ -98,10 +99,11 @@ RSMI
         	lengthChange: false,
         	buttons: [ 
         					{
-        						extend: 'excel',
+	    						extend: 'excel',
 				                exportOptions: {
 				                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
 				                }
+
         					},
         					{
 	    						extend: 'print',
@@ -146,7 +148,7 @@ RSMI
 			language: {
 					searchPlaceholder: "Search..."
 			},
-			"dom": "<'row'<'col-sm-2'<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
+			"dom": "<'row'<'col-sm-2'B<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
 							"<'row'<'col-sm-12'tr>>" +
 							"<'row'<'col-sm-5'><'col-sm-7'>>",
 			"processing": true,
@@ -155,13 +157,13 @@ RSMI
 					{ data: "reference" },
 					{ data: "office" },
 					{ data: "stocknumber"},
-					{ data: "supply.supplytype" },
-					{ data: "supply.unit" },
+					{ data: "supplytype" },
+					{ data: "unit" },
 					{ data: "issuequantity" },
 					{ data: function(callback){
 						try{
 							@if(Auth::user()->accesslevel == 1)
-							return callback.supply.unitprice
+							return callback.unitprice
 							@else
 							return ""
 							@endif
@@ -170,7 +172,7 @@ RSMI
 					{ data: function(callback){
 						try{
 							@if(Auth::user()->accesslevel == 1)
-							return parseFloat(callback.issuequantity) * parseFloat(callback.supply.unitprice)
+							return callback.amount
 							@else
 							return ""
 							@endif
@@ -178,7 +180,7 @@ RSMI
 					}},
 					@if(Auth::user()->accesslevel == 1)
 					{ data: function(callback){ 
-						return "<button type='button' class='copy btn btn-default btn-sm' data-stocknumber='"+callback.stocknumber+"' data-daystoconsume='"+callback.daystoconsume+"' data-reference='"+callback.reference+"' data-quantity='"+callback.issuequantity+"' >Create Own Copy</button>"
+						return "<button type='button' class='copy btn btn-default btn-sm' data-stocknumber='"+callback.stocknumber+"'  data-reference='"+callback.reference+"' data-quantity='"+callback.issuequantity+"' >Create Own Copy</button>"
 					} },
 					@endif
 			],
@@ -189,10 +191,7 @@ RSMI
         	lengthChange: false,
         	buttons: [ 
         					{
-        						extend: 'excel',
-				                exportOptions: {
-				                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
-				                }
+        						extend: 'excel'
         					},
         					{
 	    						extend: 'print',
@@ -202,18 +201,21 @@ RSMI
                 					return `
                 					<p class="text-center">Polytechnic University of the Philippines </p>
                 					<p class="text-center">Property and Supplies Office"</p><br /><br />
-                					<p class="text-center"><b>Report on Supplies and Materials Issued</b></p> `;
-                				},
-				                exportOptions: {
-				                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
-				                }
+                					<p class="text-center"><b>Recapitulation	</b></p> `;
+                				}
 
         					}
     				 ],
+			initComplete : function () {
+     			rsmitotaltable.buttons().container()
+        			.appendTo( 'div.totalprint' );			
+    		},
 			language: {
 					searchPlaceholder: "Search..."
 			},
-			"dom": "tr",
+			"dom": "<'row'<'col-sm-2'B<'totalprint'>><'col-sm-7'><'col-sm-3'f>>" +
+							"<'row'<'col-sm-12'tr>>" +
+							"<'row'<'col-sm-5'><'col-sm-7'>>",
 			"processing": true,
 			ajax: '{{ url("inventory/supply/rsmi/total/bystocknumber") }}' + '/' + date,
 			columns: [
@@ -226,6 +228,19 @@ RSMI
 						@else
 						return ""
 						@endif
+					} },
+					{ data: function(callback){
+						@if(Auth::user()->accesslevel == 1)
+						total = callback.unitprice * callback.issuequantity
+						if(!isNaN(total))
+						{
+							return total
+						}
+						@else
+						return ""
+						@endif
+
+						return "";
 					} },
 					{ data: function(){
 						return ""
@@ -272,7 +287,6 @@ RSMI
     	}
 
     	$('#rsmiTable').on('click','.copy',function(){
-    		daystoconsume = $(this).data('daystoconsume')
     		quantity = $(this).data('quantity')
     		reference = $(this).data('reference')
     		stocknumber = $(this).data('stocknumber')
@@ -307,7 +321,7 @@ RSMI
 	          			success:function(response){
 	          				if(response == 'success')
 	          				{
-								createRecord(date,daystoconsume,quantity,reference,stocknumber)
+								createRecord(date,quantity,reference,stocknumber)
 				          	} else if(response == 'duplicate')
 	          				{
 						        swal({
@@ -338,7 +352,7 @@ RSMI
 	        })
     	})
 
-    	function createRecord(date,daystoconsume,quantity,reference,stocknumber)
+    	function createRecord(date,quantity,reference,stocknumber)
     	{
             $.ajax({
 			    headers: {
@@ -347,7 +361,6 @@ RSMI
             	url: '{{ route("supplyledger.copy") }}',
             	type: 'post',
             	data: {
-            		'daystoconsume':daystoconsume,
             		'quantity': quantity,
             		'reference': reference,
             		'stocknumber': stocknumber,

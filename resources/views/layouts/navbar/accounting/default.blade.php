@@ -38,9 +38,17 @@
     <div class="collapse navbar-collapse" id="navbar-collapse-2">
       <!-- navbar -->
       <ul class="nav navbar-nav">
-        <li>{{ link_to('inventory/supply','Supply Inventory') }}</li>
-        <li>{{ link_to('maintenance/supply','Supply Information') }}</li>
-        <li>{{ link_to('inventory/supply/rsmi','RSMI') }}</li>
+        <li>{{ link_to('purchaseorder','Purchase Order') }}</li>
+        <li>{{ link_to('inventory/supply','Inventory') }}</li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle text-capitalize" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Reports <span class="caret"></span></a>
+          <!-- dropdown items -->
+          <ul class="dropdown-menu">
+            <li>{{ link_to('report/rsmi','RSMI') }}</li>
+            <li>{{ link_to('report/fundcluster','Fund Cluster') }}</li>
+          </ul> <!-- end of dropdown items -->
+        </li>
 
       </ul><!-- end of navbar -->
       <ul class="nav navbar-nav navbar-right">

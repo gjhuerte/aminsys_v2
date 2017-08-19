@@ -39,7 +39,8 @@
 
       <!-- navbar -->
       <ul class="nav navbar-nav">
-        <li>{{ link_to('/','Supplies') }}</li>
+        <li>{{ link_to('/','Purchase Order') }}</li>
+        <li>{{ link_to('inventory/supply','Inventory') }}</li>
         <li>{{ link_to('account','Accounts') }}</li>
         <li>{{ link_to('audittrail','Audit Trail') }}</li>
 

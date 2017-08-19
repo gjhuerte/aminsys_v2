@@ -73,27 +73,9 @@ Supply | Edit
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Fund Cluster') }}
-					{{ Form::text('fundcluster',Input::old('fundcluster'),[
-						'id' => 'fundcluster',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
 					{{ Form::label('Unit Of Measurement') }}
 					{{ Form::text('unit',Input::old('unit'),[
 						'id' => 'unit',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Price') }}
-					{{ Form::text('price',Input::old('price'),[
-						'id' => 'price',
 						'class' => 'form-control'
 					]) }}
 				</div>

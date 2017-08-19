@@ -48,7 +48,6 @@ class SupplyController extends Controller {
 
 		$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
 		$entityname = $this->sanitizeString(Input::get('entityname'));
-		$fundcluster = $this->sanitizeString(Input::get('fundcluster'));
 		$description = $this->sanitizeString(Input::get('description'));
 		$unit = $this->sanitizeString(Input::get('unit'));
 
@@ -64,10 +63,8 @@ class SupplyController extends Controller {
 		$validator = Validator::make([
 			'Stock Number' => $stocknumber,
 			'Entity Name' => $entityname,
-			'Fund Cluster' => $fundcluster,
 			'Supply Type' => $supplytype,
 			'Unit' => $unit,
-			'Unit Price' => $price,
 			'Reorder Point' => $reorderpoint
 		],Supply::$rules);
 
@@ -82,9 +79,7 @@ class SupplyController extends Controller {
 		$supply->stocknumber = $stocknumber;
 		$supply->entityname = $entityname;
 		$supply->supplytype = $supplytype;
-		$supply->fundcluster = $fundcluster;
 		$supply->unit = $unit;
-		$supply->unitprice = $price;
 		$supply->reorderpoint = $reorderpoint;
 		$supply->save();
 
@@ -133,26 +128,16 @@ class SupplyController extends Controller {
 	{
 		$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
 		$entityname = $this->sanitizeString(Input::get('entityname'));
-		$fundcluster = $this->sanitizeString(Input::get('fundcluster'));
 		$description = $this->sanitizeString(Input::get('description'));
 		$unit = $this->sanitizeString(Input::get('unit'));
-		
-		if(Input::has('price'))
-		{
-			$price = $this->sanitizeString(Input::get('price'));
-		} else 
-			$price = null;
-
 		$reorderpoint = $this->sanitizeString(Input::get("reorderpoint"));
 		$supplytype = $this->sanitizeString(Input::get('supplytype'));
 
 		$validator = Validator::make([
 			'Stock Number' => $stocknumber,
 			'Entity Name' => $entityname,
-			'Fund Cluster' => $fundcluster,
 			'Supply Type' => $supplytype,
 			'Unit' => $unit,
-			'Unit Price' => $price,
 			'Reorder Point' => $reorderpoint
 		],Supply::$updateRules);
 
@@ -167,9 +152,7 @@ class SupplyController extends Controller {
 		$supply->stocknumber = $stocknumber;
 		$supply->entityname = $entityname;
 		$supply->supplytype = $supplytype;
-		$supply->fundcluster = $fundcluster;
 		$supply->unit = $unit;
-		$supply->unitprice = $price;
 		$supply->reorderpoint = $reorderpoint;
 		$supply->save();
 

@@ -25,11 +25,11 @@ Supply Inventory
 <div class="container-fluid" id="page-body">
 	<div class="col-md-12">
 		<div class="panel panel-body table-responsive">
+			<legend><h3 class="text-muted">Supplies Inventory</h3></legend>
 			<table class="table table-hover table-striped table-bordered table-condensed" id="supplyInventoryTable">
 				<thead>
 					<th>Stock No.</th>
 					<th>Supply Item</th>
-					<th>Fund Cluster</th>
 					<th>Unit</th>
 					<th>Reorder Point</th>
 					@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
@@ -59,7 +59,7 @@ Supply Inventory
 			language: {
 					searchPlaceholder: "Search..."
 			},
-			@if(Auth::user()->accesslevel == 0)
+			@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
 			"dom": "<'row'<'col-sm-9'<'toolbar'>><'col-sm-3'f>>" +
 							"<'row'<'col-sm-12'tr>>" +
 							"<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -69,7 +69,6 @@ Supply Inventory
 			columns: [
 					{ data: "stocknumber" },
 					{ data: "supplytype" },
-					{ data: "fundcluster" },
 					{ data: "unit" },
 					{ data: "reorderpoint" },
 					@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
@@ -87,20 +86,27 @@ Supply Inventory
 			],
 	    });
 
-	 // 	$("div.toolbar").html(`
-		// 		<button id="accept" class="btn btn-sm btn-success">
-		// 			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-		// 			<span id="nav-text"> Batch Accept</span>
-		// 		</button>
-		// 		<button id="release" class="btn btn-sm btn-danger">
-		// 			<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
-		// 			<span id="nav-text"> Batch Release</span>
-		// 		</button>
-		// `);
+	    @if(Auth::user()->accesslevel == 1)
+	 	$("div.toolbar").html(`
+				<button id="accept" class="btn btn-sm btn-success">
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					<span id="nav-text"> Batch Accept</span>
+				</button>
+				<button id="release" class="btn btn-sm btn-danger">
+					<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
+					<span id="nav-text"> Batch Release</span>
+				</button>
+		`);
+		@endif
+
 		@if(Auth::user()->accesslevel == 0)
 	 	$("div.toolbar").html(`
+			<button id="accept" class="btn btn-sm btn-success">
+				<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+				<span id="nav-text"> Batch Accept</span>
+			</button>
 			<button id="release" class="btn btn-sm btn-danger">
-				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
+				<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
 				<span id="nav-text"> Batch Release</span>
 			</button>
 		`);
@@ -109,12 +115,16 @@ Supply Inventory
 		$('#accept').on("click",function(){
 			@if(Auth::user()->accesslevel == 0)
 			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/accept') }}"
+			@elseif(Auth::user()->accesslevel == 1)
+			window.location.href = "{{ url('inventory/supply/supplyledger/batch/form/accept') }}"
 			@endif
 		});
 
 		$('#release').on('click',function(){
 			@if(Auth::user()->accesslevel == 0)
 			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/release') }}"
+			@elseif(Auth::user()->accesslevel == 1)
+			window.location.href = "{{ url('inventory/supply/supplyledger/batch/form/release') }}"
 			@endif
 
 		});

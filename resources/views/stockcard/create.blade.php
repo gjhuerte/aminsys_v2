@@ -69,20 +69,20 @@ Stock Card | Accept
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Reference ( Purchase Order )') }}
-					{{ Form::text('reference',Input::old('reference'),[
+					{{ Form::label('Purchase Order Number') }}
+					{{ Form::text('purchaseorder',Input::old('purchaseorder'),[
 						'class' => 'form-control'
 					]) }}
 				</div>
 			</div>
-{{-- 			<div class="col-md-12">
+			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Office') }}
-					{{ Form::text('office',Input::old('office'),[
+					{{ Form::label('Delivery Receipt') }}
+					{{ Form::text('deliveryreceipt',Input::old('deliveryreceipt'),[
 						'class' => 'form-control'
 					]) }}
 				</div>
-			</div> --}}
+			</div>
 			<div class="col-md-12">
 				<div class="form-group">
 					{{ Form::label('Receipt Quantity') }}

@@ -25,16 +25,17 @@ Supply
 <div class="container-fluid" id="page-body">
 	<div class="col-md-12">
 		<div class="panel panel-body table-responsive">
+			<legend>Supplies</legend>
 			<table class="table table-hover table-striped table-bordered table-condensed" id="supplyTable">
 				<thead>
 					<th>Stock No.</th>
 					<th>Entity Name</th>
-					<th>Fund Cluster</th>
-					<th>Supply Type</th>
+					<th>Supply Item</th>
 					<th>Unit</th>
-					<th>Unit Price</th>
 					<th>Reorder Point</th>
+					@if(Auth::user()->accesslevel == 0)
 					<th class="no-sort"></th>
+					@endif
 				</thead>
 			</table>
 		</div>
@@ -69,27 +70,27 @@ Supply
 			columns: [
 					{ data: "stocknumber" },
 					{ data: "entityname" },
-					{ data: "fundcluster" },
 					{ data: "supplytype" },
 					{ data: "unit" },
-					{ data: "unitprice" },
-					{ data: "reorderpoint" },
-		            { data: function(callback){
+					{ data: "reorderpoint" }
+					@if(Auth::user()->accesslevel == 0)
+		           , { data: function(callback){
 		            	return `
 		            			<a href="{{ url("maintenance/supply") }}` + '/' + callback.stocknumber + '/edit' + `" class="btn btn-default btn-sm btn-block">Edit</a>
 		            	`;
 		            } }
+		            @endif
 			],
 	    });
 
+		@if(Auth::user()->accesslevel == 0)
 	 	$("div.toolbar").html(`
-	 			@if(Auth::user()->accesslevel == 0)
 				<a href="{{ url('maintenance/supply/create') }}" class="btn btn-sm btn-primary">
 					<span class="glyphicon glyphicon-tag" aria-hidden="true"></span>
 					<span id="nav-text"> Add new Supply</span>
 				</a>
-				@endif
 		`);
+		@endif
 
 		$('#page-body').show();
 	} );

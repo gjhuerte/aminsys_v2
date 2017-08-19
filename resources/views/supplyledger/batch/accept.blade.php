@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-Stock Card | Release
+Supply Ledger | Accept
 @stop
 @section('navbar')
 @include('layouts.navbar')
@@ -26,8 +26,8 @@ Stock Card | Release
 <div class="container-fluid" id="page-body">
 	<div class="col-md-offset-3 col-md-6 panel">
 		<div class="panel-body">
-			{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
-			<legend><h3 class="text-muted">Batch Release</h3></legend>
+			{{ Form::open(['method'=>'post','route'=>array('supply.supplyledger.batch.accept'),'class'=>'form-horizontal','id'=>'acceptForm']) }}
+			<legend><h3 class="text-muted">Batch Accept</h3></legend>
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">
 	            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -40,21 +40,13 @@ Stock Card | Release
 	        @endif
 			<ul class="breadcrumb">
 				<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-				<li class="active">Batch Release</li>
+				<li class="active">Batch Accept</li>
 			</ul>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Office') }}
-					{{ Form::text('office',Input::old('office'),[
-						'id' => 'office',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Requisition Issuance Slip') }}
-					{{ Form::text('reference',Input::old('reference'),[
+					{{ Form::label('Purchase Order / APR') }}
+					{{ Form::text('purchaseorder',Input::old('purchaseorder'),[
+						'id' => 'purchaseorder',
 						'class' => 'form-control'
 					]) }}
 				</div>
@@ -101,7 +93,7 @@ Stock Card | Release
 				]) }}
 				</div>
 			</div>
-			<div class="btn-group" style="margin-bottom: 20px">
+			<div class="btn-group" style="margin-bottom: 20px;">
 				<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
 			</div>
 			<legend></legend>
@@ -114,11 +106,12 @@ Stock Card | Release
 						<th></th>
 					</tr>
 				</thead>
-				<tbody></tbody>
+				<tbody>
+				</tbody>
 			</table>
 			<div class="pull-right">
 				<div class="btn-group">
-					<button type="button" id="release" class="btn btn-md btn-primary btn-block">Release</button>
+					<button type="button" id="accept" class="btn btn-md btn-primary btn-block">Accept</button>
 				</div>
 				<div class="btn-group">
 					<button type="button" id="cancel" class="btn btn-md btn-default">Cancel</button>
@@ -134,6 +127,10 @@ Stock Card | Release
 <script>
 $('document').ready(function(){
 
+	$('#purchaseorder').autocomplete({
+		source: "{{ url('get/purchaseorder/all') }}"
+	})
+
 	$('#stocknumber').autocomplete({
 		source: "{{ url("get/inventory/supply/stocknumber") }}"
 	})
@@ -142,7 +139,7 @@ $('document').ready(function(){
 		source: "{{ url('get/office/code') }}"
 	})
 
-	$('#release').on('click',function(){
+	$('#accept').on('click',function(){
 		if($('#supplyTable > tbody > tr').length == 0)
 		{
 			swal('Blank Field Notice!','Supply table must have atleast 1 item','error')
@@ -159,12 +156,13 @@ $('document').ready(function(){
 	        },
 	        function(isConfirm){
 	          if (isConfirm) {
-	            $('#releaseForm').submit();
+	            $('#acceptForm').submit();
 	          } else {
 	            swal("Cancelled", "Operation Cancelled", "error");
 	          }
 	        })			
 		}
+	
 	})
 
 	$('#cancel').on('click',function(){

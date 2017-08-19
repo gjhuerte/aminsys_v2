@@ -23,22 +23,16 @@ class CreateAudittrigger extends Migration
         DB::unprepared('
         CREATE DEFINER=`root`@`localhost` TRIGGER `update_data` AFTER UPDATE ON `supply` FOR EACH ROW 
         BEGIN 
-        IF (NEW.stocknumber != OLD.stocknumber) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
+        IF (NEW.stocknumber != OLD.stocknumber) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `date`) 
         VALUES ("stocknumber", "updated", OLD.stocknumber, NEW.stocknumber,NOW()); 
         END IF; 
-        IF (NEW.fundcluster != OLD.fundcluster) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
-        VALUES ("fundcluster", "updated", OLD.fundcluster, NEW.fundcluster,NOW()); 
-        END IF; 
-        IF (NEW.supplytype != OLD.supplytype) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
+        IF (NEW.supplytype != OLD.supplytype) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `date`) 
         VALUES ("supplytype", "updated", OLD.supplytype, NEW.supplytype,NOW()); 
         END IF; 
         IF (NEW.unit != OLD.unit) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
         VALUES ("unit", "update", OLD.unit, NEW.unit,NOW()); 
         END IF; 
-        IF (NEW.unitprice != OLD.unitprice) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
-        VALUES ("unitprice", "updated", OLD.unitprice, NEW.unitprice,NOW()); 
-        END IF; 
-        IF (NEW.reorderpoint != OLD.reorderpoint) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `data`) 
+        IF (NEW.reorderpoint != OLD.reorderpoint) THEN INSERT INTO audittable (`columnname` , `status` , `oldvalue` , `newvalue`, `date`) 
         VALUES ("reorderpoint", "updated", OLD.reorderpoint, NEW.reorderpoint,NOW()); 
         END IF; 
         END');

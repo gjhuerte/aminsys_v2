@@ -21,10 +21,10 @@ class UserTableSeeder extends Seeder {
 		   'username' => 'amo',
 		   'password' => Hash::make('12345678'),
 		   'accesslevel' =>'0',
-			 'firstname' => 'John',
-			 'middlename' => '',
-			 'lastname' => 'Doe',
-			 'email' => 'john@yahoo.com',
+			 'firstname' => 'Assets',
+			 'middlename' => 'Management',
+			 'lastname' => 'Office',
+			 'email' => 'amo@yahoo.com',
 		   'status' =>'1'
 		));
 
@@ -32,10 +32,10 @@ class UserTableSeeder extends Seeder {
 		   'username' => 'accounting',
 		   'password' => Hash::make('12345678'),
 		   'accesslevel' =>'1',
-			 'firstname' => 'Juan',
+			 'firstname' => 'Accounting',
 			 'middlename' => '',
-			 'lastname' => 'Dela Cruz',
-			 'email' => 'juandelacruz@yahoo.com',
+			 'lastname' => 'Office',
+			 'email' => 'accountingoffice@yahoo.com',
 		   'status' =>'1'
 		));
 
@@ -43,9 +43,9 @@ class UserTableSeeder extends Seeder {
 		   'username' => 'admin',
 		   'password' => Hash::make('12345678'),
 		   'accesslevel' =>'2',
-			 'firstname' => 'Peter',
+			 'firstname' => 'Administrator',
 			 'middlename' => '',
-			 'lastname' => 'Pandecoco',
+			 'lastname' => 'Only',
 			 'email' => 'pedropandesal@yahoo.com',
 		   'status' =>'1'
 		));

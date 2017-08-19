@@ -17,10 +17,10 @@ class CreateSupplyTable extends Migration {
 			$table->string('stocknumber',50);
 			$table->primary('stocknumber');
 			$table->string('entityname',200);
-			$table->string('fundcluster')->nullable();	
+			/*$table->string('fundcluster')->nullable();	*/
             $table->string('supplytype');		
             $table->string('unit',100)->nullable();
-            $table->decimal('unitprice')->nullable();
+            /*$table->decimal('unitprice')->nullable();*/
             $table->integer('reorderpoint')->nullable();
 			$table->timestamps();
 		});

@@ -60,14 +60,6 @@ Inventory | Add
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Fund Cluster') }}
-					{{ Form::text('fundcluster',Input::old('fundcluster'),[
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
 					{{ Form::label('Unit Of Measurement') }}
 					{{ Form::text('unit',Input::old('unit'),[
 						'class' => 'form-control'
