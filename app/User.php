@@ -48,6 +48,15 @@ class User extends \Eloquent implements Authenticatable
 		'New Password'=>'required|min:8|max:50'
 	);
 
+	public static $updateRules = array(
+		'Username' => 'min:4|max:20',
+		'Password' => 'min:6|max:50',
+		'First name' => 'min:2|max:100|string',
+		'Middle name' => 'min:2|max:50|string',
+		'Last name' => 'min:2|max:50|string',
+		'Email' => 'email'
+	);
+
 
 	public function getRememberToken()
 	{
@@ -75,13 +84,4 @@ class User extends \Eloquent implements Authenticatable
 		 parent::setAttribute($key, $value);
 		}
 	}
-
-	public static $updateRules = array(
-		'Username' => 'min:4|max:20',
-		'Password' => 'min:6|max:50',
-		'First name' => 'min:2|max:100|string',
-		'Middle name' => 'min:2|max:50|string',
-		'Last name' => 'min:2|max:50|string',
-		'Email' => 'email'
-	);
 }

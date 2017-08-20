@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-Batch | Accept
+Stock Card | Accept
 @stop
 @section('navbar')
 @include('layouts.navbar')
@@ -9,7 +9,7 @@ Batch | Accept
 {{ HTML::style(asset('css/select.bootstrap.min.css')) }}
 <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
 <style>
-	#page-body{
+	#page-body,#add{
 		display: none;
 	}
 
@@ -26,7 +26,7 @@ Batch | Accept
 <div class="container-fluid" id="page-body">
 	<div class="col-md-offset-3 col-md-6 panel">
 		<div class="panel-body">
-			{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.release'),'class'=>'form-horizontal']) }}
+			{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.accept'),'class'=>'form-horizontal','id'=>'acceptForm']) }}
 			<legend><h3 class="text-muted">Batch Accept</h3></legend>
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">
@@ -40,21 +40,21 @@ Batch | Accept
 	        @endif
 			<ul class="breadcrumb">
 				<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-				<li class="active">Batch Release</li>
+				<li class="active">Batch Accept</li>
 			</ul>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Office') }}
-					{{ Form::text('office',Input::old('office'),[
-						'id' => 'office',
+					{{ Form::label('Purchase Order') }}
+					{{ Form::text('purchaseorder',Input::old('purchaseorder'),[
+						'id' => 'purchaseorder',
 						'class' => 'form-control'
 					]) }}
 				</div>
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Issuance') }}
-					{{ Form::text('reference',Input::old('reference'),[
+					{{ Form::label('Delivery Receipt') }}
+					{{ Form::text('dr',Input::old('dr'),[
 						'class' => 'form-control'
 					]) }}
 				</div>
@@ -102,14 +102,10 @@ Batch | Accept
 				</div>
 			</div>
 			<div class="btn-group" style="margin-bottom: 20px;">
-				<div class="btn-group">
-					<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
-				</div>
-				<div class="btn-group">
-					<button type="button" id="cancel" class="btn btn-md btn-warning"><span class="glyphicon glyphicon-share-alt"></span> Cancel</button>
-				</div>
+				<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
 			</div>
-			<table class="table table-hover table-condensed" id="supplyTable">
+			<legend></legend>
+			<table class="table table-hover table-condensed table-bordered" id="supplyTable">
 				<thead>
 					<tr>
 						<th>Stock Number</th>
@@ -118,11 +114,15 @@ Batch | Accept
 						<th></th>
 					</tr>
 				</thead>
-				<tbody></tbody>
+				<tbody>
+				</tbody>
 			</table>
-			<div class="btn-group pull-right">
+			<div class="pull-right">
 				<div class="btn-group">
-					<button type="submit" id="release" class="btn btn-md btn-primary btn-block"><span class="glyphicon glyphicon-share-alt"></span> Accept</button>
+					<button type="button" id="accept" class="btn btn-md btn-primary btn-block">Accept</button>
+				</div>
+				<div class="btn-group">
+					<button type="button" id="cancel" class="btn btn-md btn-default">Cancel</button>
 				</div>
 			</div>
 			{{ Form::close() }}
@@ -135,6 +135,10 @@ Batch | Accept
 <script>
 $('document').ready(function(){
 
+	$('#purchaseorder').autocomplete({
+		source: "{{ url('get/purchaseorder/all') }}"
+	})
+
 	$('#stocknumber').autocomplete({
 		source: "{{ url("get/inventory/supply/stocknumber") }}"
 	})
@@ -143,25 +147,69 @@ $('document').ready(function(){
 		source: "{{ url('get/office/code') }}"
 	})
 
-	$('#stocknumber').on('change',function(){
-		$.ajax({
-			type: 'get',
-			url: '{{ url('get/supply') }}' +  '/' + $('#stocknumber').val() + '/balance',
-			dataType: 'json',
-			success: function(response){
-				details = response.data[0].supplytype
-				$('#supply-item').val(details.toString())
-				$('#stocknumber-details').html(`
-					<div class="alert alert-warning">
-						<ul class="list-unstyled">
-							<li><strong>Item:</strong> ` + response.data[0].supplytype + ` </li>
-							<li><strong>Remaining Balance:</strong> ` 
-							+ (response.data[0].totalreceiptquantity-response.data[0].totalissuequantity) + 
-							`</li>
-						</ul>
-					</div>
-				`)
-			}
+	$('#accept').on('click',function(){
+		if($('#supplyTable > tbody > tr').length == 0)
+		{
+			swal('Blank Field Notice!','Supply table must have atleast 1 item','error')
+		} else {
+        	swal({
+	          title: "Are you sure?",
+	          text: "This will no longer be editable once submitted. Do you want to continue?",
+	          type: "warning",
+	          showCancelButton: true,
+	          confirmButtonText: "Yes, submit it!",
+	          cancelButtonText: "No, cancel it!",
+	          closeOnConfirm: false,
+	          closeOnCancel: false
+	        },
+	        function(isConfirm){
+	          if (isConfirm) {
+	            $('#acceptForm').submit();
+	          } else {
+	            swal("Cancelled", "Operation Cancelled", "error");
+	          }
+	        })			
+		}
+	
+	})
+
+	$('#cancel').on('click',function(){
+		window.location.href = "{{ url('inventory/supply') }}"
+	})
+
+	$('#stocknumber').on('change',function(){	
+			$.ajax({
+				type: 'get',
+				url: '{{ url('get/supply') }}' +  '/' + $('#stocknumber').val() + '/balance',
+				dataType: 'json',
+				success: function(response){
+					try{
+						details = response.data[0].supplytype
+						$('#supply-item').val(details.toString())
+						$('#stocknumber-details').html(`
+							<div class="alert alert-warning">
+								<ul class="list-unstyled">
+									<li><strong>Item:</strong> ` + response.data[0].supplytype + ` </li>
+									<li><strong>Remaining Balance:</strong> ` 
+									+ (response.data[0].totalreceiptquantity-response.data[0].totalissuequantity) + 
+									`</li>
+								</ul>
+							</div>
+						`)
+
+						$('#add').show()
+					} catch (e) {
+						$('#stocknumber-details').html(`
+							<div class="alert alert-danger">
+								<ul class="list-unstyled">
+									<li>Invalid Property Number</li>
+								</ul>
+							</div>
+						`)
+
+						$('#add').hide()
+					}
+				}
 		})
 	})
 
@@ -176,7 +224,7 @@ $('document').ready(function(){
 		$('#date').val('{{ Input::old('date') }}');
 		setDate("#date");
 	@else
-		$('#date').val({{ "'".Carbon\Carbon::now()->toFormattedDateString()."'" }});
+		$('#date').val('{{ Carbon\Carbon::now()->toFormattedDateString() }}');
 		setDate("#date");
 	@endif
 
@@ -196,6 +244,7 @@ $('document').ready(function(){
 		$('#stocknumber-details').html("")
 		$('#stocknumber').val("")
 		$('#quantity').val("")
+		$('#add').hide()
 	})
 
 	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "")

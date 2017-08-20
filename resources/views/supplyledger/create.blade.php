@@ -69,8 +69,9 @@ Supply Ledger | Accept
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Reference ( Purchase Order )') }}
+					{{ Form::label('Reference') }}
 					{{ Form::text('reference',Input::old('reference'),[
+						'id' => 'reference',
 						'class' => 'form-control'
 					]) }}
 				</div>
@@ -105,6 +106,10 @@ Supply Ledger | Accept
 {{ HTML::script(asset('js/moment.min.js')) }}
 <script>
 $('document').ready(function(){
+
+	$('#reference').autocomplete({
+		source: "{{ url('get/purchaseorder/all') }}"
+	})
 
 	$( "#date" ).datepicker({
 		  changeMonth: true,

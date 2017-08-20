@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4
+class ComposerStaticInit4016c2a7c8b4ab300d66f97697ef5e1f
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
@@ -280,10 +280,16 @@ class ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4
         'CreateAudittrigger' => __DIR__ . '/../..' . '/database/migrations/2017_07_30_160123_create_audittrigger.php',
         'CreateItemtypeTable' => __DIR__ . '/../..' . '/database/migrations/2017_07_21_073935_create_itemtype_table.php',
         'CreateOfficeTable' => __DIR__ . '/../..' . '/database/migrations/2017_07_21_073456_create_office_table.php',
+        'CreatePurchaseorderSupplyTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_141731_create_purchaseorder_supply_table.php',
+        'CreatePurchaseorderTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_141643_create_purchaseorder_table.php',
+        'CreateRsmiTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_141744_create_rsmi_table.php',
+        'CreateSupplierTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_141502_create_supplier_table.php',
         'CreateSupplyTable' => __DIR__ . '/../..' . '/database/migrations/2017_07_21_073957_create_supply_table.php',
-        'CreateSupplyledgerTable' => __DIR__ . '/../..' . '/database/migrations/2017_07_22_160846_create_supplyledger_table.php',
-        'CreateSupplytransactionTable' => __DIR__ . '/../..' . '/database/migrations/2017_07_21_074024_create_supplytransaction_table.php',
+        'CreateSupplyledgerTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_161939_create_supplyledger_table.php',
+        'CreateSupplytransactionTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_04_161920_create_supplytransaction_table.php',
+        'CreateTransactiontriggerTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_05_070212_create_transactiontrigger_table.php',
         'CreateUserTable' => __DIR__ . '/../..' . '/database/migrations/2017_03_03_090731_create_user_table.php',
+        'CreateViewsTable' => __DIR__ . '/../..' . '/database/migrations/2017_08_06_154154_create_views_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'File_Iterator' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Iterator.php',
         'File_Iterator_Facade' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Facade.php',
@@ -827,10 +833,10 @@ class ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc46002d6dedf39ce8913992dea26e1a4::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4016c2a7c8b4ab300d66f97697ef5e1f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4016c2a7c8b4ab300d66f97697ef5e1f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit4016c2a7c8b4ab300d66f97697ef5e1f::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit4016c2a7c8b4ab300d66f97697ef5e1f::$classMap;
 
         }, null, ClassLoader::class);
     }

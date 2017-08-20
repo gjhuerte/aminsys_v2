@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('title')
-Stock Card | Release
+Purchase Order | Create
 @stop
 @section('navbar')
 @include('layouts.navbar')
@@ -26,8 +26,8 @@ Stock Card | Release
 <div class="container-fluid" id="page-body">
 	<div class="col-md-offset-3 col-md-6 panel">
 		<div class="panel-body">
-			{{ Form::open(['method'=>'post','route'=>array('supply.stockcard.batch.release'),'class'=>'form-horizontal','id'=>'releaseForm']) }}
-			<legend><h3 class="text-muted">Batch Release</h3></legend>
+			{{ Form::open(['method'=>'post','route'=>array('purchaseorder.store'),'class'=>'form-horizontal','id'=>'purchaseOrderForm']) }}
+			<legend><h3 class="text-muted">Purchase Order</h3></legend>
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">
 	            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -39,26 +39,9 @@ Stock Card | Release
 	            </div>
 	        @endif
 			<ul class="breadcrumb">
-				<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-				<li class="active">Batch Release</li>
+				<li><a href="{{ url('purchaseorder') }}">Purchase Order</a></li>
+				<li class="active">Create</li>
 			</ul>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Office') }}
-					{{ Form::text('office',Input::old('office'),[
-						'id' => 'office',
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
-			<div class="col-md-12">
-				<div class="form-group">
-					{{ Form::label('Requisition Issuance Slip') }}
-					{{ Form::text('reference',Input::old('reference'),[
-						'class' => 'form-control'
-					]) }}
-				</div>
-			</div>
 			<div class="col-md-12">
 				<div class="form-group">
 					{{ Form::label('Date') }}
@@ -72,13 +55,33 @@ Stock Card | Release
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Days to Consume') }}
-					{{ Form::text('daystoconsume',Input::old('daystoconsume'),[
-						'id' => 'daystoconsume',
-						'class' => 'form-control',
+					{{ Form::label('Purchase Order Number / APR') }}
+					{{ Form::text('po',Input::old('po'),[
+						'id' => 'purchaseorder',
+						'class' => 'form-control'
+					]) }}
+					<p class="text-danger">This field is required</p>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="form-group">
+					{{ Form::label('Details (Optional)') }}
+					{{ Form::text('details',Input::old('details'),[
+						'class' => 'form-control'
 					]) }}
 				</div>
 			</div>
+			<div class="col-md-12" hidden>
+				<div class="form-group">
+					{{ Form::label('Fund Cluster') }}
+					{{ Form::text('fundcluster',Input::old('fundcluster'),[
+						'id' => 'fundcluster',
+						'class' => 'form-control',
+						'style' => 'background-color: white;'
+					]) }}
+					<p class="text-success">This field will be inputted by accounting department</p>
+				</div>
+			</div>	
 			<legend></legend>
 			<div class="form-group">
 				<div class="col-md-12">
@@ -87,6 +90,7 @@ Stock Card | Release
 					'id' => 'stocknumber',
 					'class' => 'form-control'
 				]) }}
+				<p class="text-danger">This field is required</p>
 				</div>
 			</div>
 			<input type="hidden" id="supply-item" />
@@ -94,23 +98,24 @@ Stock Card | Release
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-				{{ Form::label('Quantity') }}
-				{{ Form::text('quantity','',[
+				{{ Form::label('Ordered Quantity') }}
+				{{ Form::text('quantity',null,[
 					'id' => 'quantity',
 					'class' => 'form-control'
 				]) }}
+				<p class="text-danger">This field is required</p>
 				</div>
 			</div>
-			<div class="btn-group" style="margin-bottom: 20px">
+			<div style="margin-bottom: 20px;">
 				<button type="button" id="add" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Add</button>
 			</div>
-			<legend></legend>
 			<table class="table table-hover table-condensed table-bordered" id="supplyTable">
 				<thead>
 					<tr>
 						<th>Stock Number</th>
 						<th>Information</th>
 						<th>Quantity</th>
+						<th>Unit Price</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -118,7 +123,7 @@ Stock Card | Release
 			</table>
 			<div class="pull-right">
 				<div class="btn-group">
-					<button type="button" id="release" class="btn btn-md btn-primary btn-block">Release</button>
+					<button type="button" id="accept" class="btn btn-md btn-primary">Accept</button>
 				</div>
 				<div class="btn-group">
 					<button type="button" id="cancel" class="btn btn-md btn-default">Cancel</button>
@@ -134,6 +139,10 @@ Stock Card | Release
 <script>
 $('document').ready(function(){
 
+	@if(Auth::user()->accesslevel == 0)
+	$('#fundcluster').prop('readonly','readonly')
+	@endif
+
 	$('#stocknumber').autocomplete({
 		source: "{{ url("get/inventory/supply/stocknumber") }}"
 	})
@@ -142,7 +151,7 @@ $('document').ready(function(){
 		source: "{{ url('get/office/code') }}"
 	})
 
-	$('#release').on('click',function(){
+	$('#accept').on('click',function(){
 		if($('#supplyTable > tbody > tr').length == 0)
 		{
 			swal('Blank Field Notice!','Supply table must have atleast 1 item','error')
@@ -159,7 +168,7 @@ $('document').ready(function(){
 	        },
 	        function(isConfirm){
 	          if (isConfirm) {
-	            $('#releaseForm').submit();
+	            $('#purchaseOrderForm').submit();
 	          } else {
 	            swal("Cancelled", "Operation Cancelled", "error");
 	          }
@@ -168,7 +177,11 @@ $('document').ready(function(){
 	})
 
 	$('#cancel').on('click',function(){
-		window.location.href = "{{ url('inventory/supply') }}"
+		window.location.href = "{{ url('purchaseorder') }}"
+	})
+
+	$('#purchaseorder').autocomplete({
+		source: "{{ url('get/purchaseorder/all') }}"
 	})
 
 	$('#stocknumber').on('change',function(){	
@@ -181,12 +194,9 @@ $('document').ready(function(){
 						details = response.data[0].supplytype
 						$('#supply-item').val(details.toString())
 						$('#stocknumber-details').html(`
-							<div class="alert alert-warning">
+							<div class="alert alert-info">
 								<ul class="list-unstyled">
 									<li><strong>Item:</strong> ` + response.data[0].supplytype + ` </li>
-									<li><strong>Remaining Balance:</strong> ` 
-									+ (response.data[0].totalreceiptquantity-response.data[0].totalissuequantity) + 
-									`</li>
 								</ul>
 							</div>
 						`)
@@ -232,35 +242,43 @@ $('document').ready(function(){
 		stocknumber = $('#stocknumber').val()
 		quantity = $('#quantity').val()
 		details = $('#supply-item').val()
-		addForm(row,stocknumber,details,quantity)
+		unitprice = $('#unitprice').val()
+		addForm(row,stocknumber,details,quantity,unitprice)
 		$('#stocknumber').text("")
 		$('#quantity').text("")
+		$('#unitprice').text("")
 		$('#stocknumber-details').html("")
 		$('#stocknumber').val("")
 		$('#quantity').val("")
+		$('#unitprice').val("")
 		$('#add').hide()
 	})
 
-	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "")
+	function addForm(row,_stocknumber = "",_info ="" ,_quantity = "",_unitprice = "")
 	{
 		$('#supplyTable > tbody').append(`
 			<tr>
 				<td><input type="text" class="form-control text-center" value="` + _stocknumber + `" name="stocknumber[` + _stocknumber + `]" style="border:none;" /></td>
 				<td>` + _info + `</td>
 				<td><input type="number" class="form-control text-center" value="` + _quantity + `" name="quantity[` + _stocknumber + `]" style="border:none;"  /></td>
+				<td><input type="number" class="form-control text-center" value="` + _unitprice + `" name="unitprice[` + _stocknumber + `]" style="border:none;"  /></td>
 				<td><button type="button" class="remove btn btn-md btn-danger text-center"><span class="glyphicon glyphicon-remove"></span></button></td>
 			</tr>
 		`)
 	}
 
+	@if(Input::has('stocknumber'))
+		{{ $quantity = Input::old('quantity') }}
+		{{ $unitprice = Input::old('unitprice') }}
+		@foreach(Input::old('stocknumber') as $stocknumber)
+		addForm('{{ $stocknumber }}','','{{ $quantity["$_stocknumber"] }}','{{ $unitprice["$_stocknumber"] }}')
+		@endforeach
+	@endif
+
 	$('#date').on('change',function(){
 		setDate("#date");
 	});
-
-	$('#cancel').on('click',function(){
-		window.location.href = "{{ url('inventory/supply') }}"
-	})
-
+	
 	$('#supplyTable').on('click','.remove',function(){
 		$(this).parents('tr').remove()
 	})

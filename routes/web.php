@@ -15,24 +15,40 @@ Route::middleware(['auth'])->group(function(){
 
 	Route::resource('/', 'HomeController');
 
-	Route::get('inventory/supply/rsmi','SupplyInventoryController@rsmi');
-	Route::get('inventory/supply/rsmi/{month}','SupplyInventoryController@rsmiPerMonth');
-	Route::get('inventory/supply/rsmi/total/bystocknumber/{month}','SupplyInventoryController@rsmiByStockNumber');
+	Route::get('inventory/supply/rsmi','RSMIController@rsmi');
+	Route::get('inventory/supply/rsmi/{month}','RSMIController@rsmiPerMonth');
+	Route::get('inventory/supply/rsmi/total/bystocknumber/{month}','RSMIController@rsmiByStockNumber');
+	Route::get('get/supply/inventory/stockcard/months/all','RSMIController@getAllMonths');
 	Route::get('logout', 'Auth\LoginController@logout');
 
+	Route::get('report/rsmi','ReportsController@getRSMIView');
+
+	Route::get('report/fundcluster','ReportsController@getFundClusterView');
+
+	Route::get('report/ris/{college}','ReportsController@getRISPerCollege');
+	Route::get('report/fundcluster','ReportsController@fundcluster');
+	/*
+	*
+	* Supply Inventory Modules
+	*/
+	// supply modules
 	Route::resource('inventory/supply','SupplyInventoryController');
-
+	// returns supply balance based on input supply
 	Route::get('get/supply/{supply}/balance','SupplyInventoryController@getSupplyWithRemainingBalance');
-
+	// return all supply stock number
 	Route::get('get/inventory/supply/stocknumber/all','StockCardController@getAllStockNumber');
-
+	// return stock number for autocomplete
 	Route::get('get/inventory/supply/stocknumber','StockCardController@getSupplyStockNumber');
 
+	/*
+	*	
+	* Office Modules
+	*/
 	Route::get('get/office/code/all','OfficeController@getAllCodes');
 
-	Route::get('get/supply/inventory/stockcard/months/all','SupplyInventoryController@getAllMonths');
-
 	Route::get('get/office/code','OfficeController@getOfficeCode');
+
+	Route::get('get/purchaseorder/all','PurchaseOrderController@getAllPurchaseOrder');
 
 	Route::resource('maintenance/supply','SupplyController');
 
@@ -42,13 +58,16 @@ Route::middleware(['auth'])->group(function(){
 
 	Route::post('get/supplyledger/checkifexisting',[
 		'as' => 'supplyledger.checkifexisting',
-		'uses' => 'SupplyLedgerController@checkIfExisting'
+		'uses' => 'SupplyLedgerController@checkIfSupplyLedgerExists'
 	]);
 
 	Route::post('get/supplyledger/copy',[
 		'as' => 'supplyledger.copy',
-		'uses' => 'SupplyLedgerController@copy'
+		'uses' => 'SupplyLedgerController@release'
 	]);
+
+	Route::put('purchaseorder/supply/{id}','PurchaseOrderSupplyController@update');
+	Route::resource('purchaseorder','PurchaseOrderController');
 
 	Route::get('settings',['as'=>'settings.edit','uses'=>'SessionsController@edit']);
 
@@ -82,10 +101,29 @@ Route::middleware(['auth','amo'])->group(function(){
 
 	Route::resource('inventory/supply.stockcard','StockCardController');
 
-
 });
 
 Route::middleware(['auth','accounting'])->group(function(){
+
+	Route::get('inventory/supply/supplyledger/batch/form/accept',[
+			'as' => 'supply.supplyledger.batch.accept.form',
+			'uses' => 'SupplyLedgerController@batchAcceptForm'
+	]);
+
+	Route::get('inventory/supply/supplyledger/batch/form/release',[
+			'as' => 'supply.supplyledger.batch.release.form',
+			'uses' => 'SupplyLedgerController@batchReleaseForm'
+	]);
+
+	Route::post('inventory/supply/supplyledger/batch/accept',[
+			'as' => 'supply.supplyledger.batch.accept',
+			'uses' => 'SupplyLedgerController@batchAccept'
+	]);
+
+	Route::post('inventory/supply/supplyledger/batch/release',[
+			'as' => 'supply.supplyledger.batch.release',
+			'uses' => 'SupplyLedgerController@batchRelease'
+	]);
 
 	Route::get('inventory/supply/{id}/supplyledger/release','SupplyLedgerController@releaseForm');
 

@@ -3,7 +3,9 @@ namespace App\Http\Controllers;
 	
 use App\SupplyLedger;
 use App\SupplyTransaction;
+use App\PurchaseOrderSupply;
 use App\Supply;
+use Auth;
 use Carbon;
 use Session;
 use Validator;
@@ -23,7 +25,7 @@ class SupplyLedgerController extends Controller {
 		if(Request::ajax())
 		{
 			return json_encode([
-				'data' => SupplyLedger::where('stocknumber','=',$stocknumber)
+				'data' => SupplyLedger::stockNumber($stocknumber)
 										->groupBy('date')
 										->select(
 												'date',
@@ -35,9 +37,9 @@ class SupplyLedgerController extends Controller {
 										->get()
 			]);
 		}
-		$supply = Supply::find($stocknumber);
+
 		return view('supplyledger.index')
-				->with('supply',$supply);
+				->with('supply',Supply::find($stocknumber));
 	}
 
 
@@ -48,9 +50,8 @@ class SupplyLedgerController extends Controller {
 	 */
 	public function create($id)
 	{
-		$supply = Supply::find($id);
 		return view('supplyledger.create')
-				->with('supply',$supply);
+				->with('supply',Supply::find($id));
 	}
 
 
@@ -67,15 +68,11 @@ class SupplyLedgerController extends Controller {
 		$receiptquantity = $this->sanitizeString(Input::get('quantity'));
 		$daystoconsume = $this->sanitizeString(Input::get('daystoconsume'));
 
-		$supply = Supply::find($stocknumber);
-		$receiptunitprice = $supply->unitprice;
-
 		$validator = Validator::make([	
 			'Date' => $date,
 			'Stock Number' => $stocknumber,
 			'Purchase Order' => $reference,
 			'Receipt Quantity' => $receiptquantity,
-			'Receipt Unit Price' => $receiptunitprice,
 			'Days To Consume' => $daystoconsume
 		],SupplyLedger::$receiptRules);
 
@@ -86,15 +83,7 @@ class SupplyLedgerController extends Controller {
 					->withErrors($validator);
 		}
 
-		$transaction = new SupplyLedger;
-		$transaction->stocknumber = $stocknumber;
-		$transaction->reference = $reference;
-		$transaction->date = Carbon\Carbon::parse($date);
-		$transaction->receiptquantity = $receiptquantity;
-		$transaction->receiptunitprice = $receiptunitprice;
-		$transaction->issueunitprice = $receiptunitprice;
-		$transaction->daystoconsume = $daystoconsume;
-		$transaction->save();
+		SupplyLedger::receipt($date,$stocknumber,$reference,$receiptquantity,$daystoconsume);
 
 		Session::flash('success-message','Operation Successful');
 		return redirect("inventory/supply/$stocknumber/supplyledger");
@@ -111,20 +100,15 @@ class SupplyLedgerController extends Controller {
 	{
 		if(Request::ajax())
 		{
-			$transaction = SupplyTransaction::with('supply')->where('stocknumber','=',$this->sanitizeString($id))->get();
+			$transaction = SupplyTransaction::with('supply')->stockNumber($id)->get();
 			return json_encode([ 'data' => $transaction ]);
 		}
 
-		$month = Carbon\Carbon::parse($month);
-
-		$supply = Supply::find($id);
-		$supplyledger = SupplyLedger::whereBetween('date',array($month->startOfMonth()->toDateString(),$month->endOfMonth()->toDateString()))
-			->where('stocknumber','=',$this->sanitizeString($id))
-			->get();
+		$supplyledger = SupplyLedger::month($month)->stockNumber($id)->get();
 		return view('supplyledger.show')
 				->with('supplyledger',$supplyledger)
-				->with('month',$month->toFormattedDateString())
-				->with('supply',$supply);
+				->with('month',Carbon\Carbon::parse($month)->toFormattedDateString())
+				->with('supply',Supply::find($id));
 	}
 
 
@@ -151,6 +135,35 @@ class SupplyLedgerController extends Controller {
 		return redirect('inventory/supply');
 	}
 
+	/**
+	 * Show the form for releasing
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function releaseForm($id)
+	{
+		$id = $this->sanitizeString($id);
+		return view('supplyledger.release')
+				->with('supply',Supply::find($id))
+				->with('balance',SupplyLedger::getRemainingBalance($id));
+	}
+
+	public function release()
+	{
+
+		if(Request::ajax())
+		{
+			$issuequantity = $this->sanitizeString(Input::get('quantity'));
+			$reference = $this->sanitizeString(Input::get('reference'));
+			$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
+			$date = $this->sanitizeString(Input::get('date'));
+			$daystoconsume = "";
+
+			SupplyLedger::issue($date,$stocknumber,$reference,$issuequantity,$daystoconsume);
+		} 
+	}
+
 
 	/**
 	 * Remove the specified resource from storage.
@@ -160,22 +173,18 @@ class SupplyLedgerController extends Controller {
 	 */
 	public function destroy($id)
 	{
+
 		$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
 		$reference = $this->sanitizeString(Input::get('reference'));
 		$date = $this->sanitizeString(Input::get('date'));
 		$issuequantity = $this->sanitizeString(Input::get('quantity'));
 		$daystoconsume = $this->sanitizeString(Input::get('daystoconsume'));
 
-		$supply = Supply::find($stocknumber);
-		$issueunitprice = $supply->unitprice;
-
-
 		$validator = Validator::make([	
 			'Date' => $date,
 			'Stock Number' => $stocknumber,
 			'Requisition and Issue Slip' => $reference,
 			'Issue Quantity' => $issuequantity,
-			'Issue Unitprice' => $issueunitprice,
 			'Days To Consume' => $daystoconsume
 		],SupplyLedger::$issueRules);
 
@@ -186,104 +195,112 @@ class SupplyLedgerController extends Controller {
 					->withErrors($validator);
 		}
 
-		$transaction = new SupplyLedger;
-		$transaction->stocknumber = $stocknumber;
-		$transaction->reference = $reference;
-		$transaction->date = Carbon\Carbon::parse($date);
-		$transaction->receiptunitprice = $issueunitprice;
-		$transaction->issuequantity = $issuequantity;
-		$transaction->issueunitprice = $issueunitprice;
-		$transaction->daystoconsume = $daystoconsume;
-		$transaction->save();
-
+		SupplyLedger::receipt($date,$stocknumber,$reference,$issuequantity,$daystoconsume);
 		Session::flash('success-message','Operation Successful');
 		return redirect("inventory/supply/$stocknumber/supplyledger");
 	}
 
-	public function releaseForm($id)
+	public function batchAcceptForm()
 	{
-		$supply = Supply::find($id);
-		$balance = SupplyLedger::where('stocknumber','=',$supply->stocknumber)->get();
-		$balance = $balance->sum('receiptquantity') - $balance->sum('issuequantity');
-		return view('supplyledger.release')
-				->with('supply',$supply)
-				->with('balance',$balance);
+		return View('supplyledger.batch.accept');
 	}
 
-	public function checkifexisting()
+	public function batchAccept()
+	{
+		$purchaseorder = $this->sanitizeString(Input::get('purchaseorder'));
+		$date = $this->sanitizeString(Input::get('date'));
+		$office = $this->sanitizeString(Input::get('office'));
+		$daystoconsume = $this->sanitizeString(Input::get("daystoconsume"));
+		$stocknumber = Input::get("stocknumber");
+		$receiptquantity = Input::get("quantity");
+
+		foreach($stocknumber as $_stocknumber)
+		{
+			$validator = Validator::make([	
+				'Stock Number' => $_stocknumber,
+				'Purchase Order' => $purchaseorder,
+				'Date' => $date,
+				'Receipt Quantity' => $receiptquantity["$_stocknumber"],
+				'Office' => $office,
+				'Days To Consume' => $daystoconsume
+			],SupplyLedger::$receiptRules);
+
+			if($validator->fails())
+			{
+				return redirect("inventory/supply/supplyledger/batch/form/accept")
+						->with('total',count($stocknumber))
+						->with('stocknumber',$stocknumber)
+						->with('quantity',$receiptquantity)
+						->with('daystoconsume',$daystoconsume)
+						->withInput()
+						->withErrors($validator);
+			}
+		}
+
+		foreach($stocknumber as $_stocknumber)
+		{
+			SupplyLedger::receipt($date,$_stocknumber,$purchaseorder,$receiptquantity["$_stocknumber"],$daystoconsume);
+		}
+
+		Session::flash('success-message','Supplies Accepted');
+		return redirect('inventory/supply');
+	}
+
+	public function batchReleaseForm()
+	{
+		return View('supplyledger.batch.release');
+	}
+
+	public function batchRelease()
+	{
+		$reference = $this->sanitizeString(Input::get('reference'));
+		$date = $this->sanitizeString(Input::get('date'));
+		$office = $this->sanitizeString(Input::get('office'));
+		$daystoconsume = $this->sanitizeString(Input::get("daystoconsume"));
+		$stocknumber = Input::get("stocknumber");
+		$issuequantity = Input::get("quantity");
+
+		foreach($stocknumber as $_stocknumber)
+		{
+			$validator = Validator::make([	
+				'Stock Number' => $stocknumber,
+				'Requisition and Issue Slip' => $reference,
+				'Date' => $date,
+				'Issue Quantity' => $issuequantity["$_stocknumber"],
+				'Office' => $office,
+				'Days To Consume' => $daystoconsume
+			],SupplyLedger::$issueRules);
+
+			if($validator->fails())
+			{
+				return redirect("inventory/supply/supplyledger/batch/form/release")
+						->with('total',count($stocknumber))
+						->with('stocknumber',$stocknumber)
+						->with('quantity',$receiptquantity)
+						->with('daystoconsume',$daystoconsume)
+						->withInput()
+						->withErrors($validator);
+			}
+		}
+
+		foreach($stocknumber as $_stocknumber)
+		{
+			SupplyLedger::issue($date,$_stocknumber,$reference,$office,$issuequantity["$_stocknumber"],$daystoconsume);
+		}
+
+		Session::flash('success-message','Supplies Released');
+		return redirect('inventory/supply');
+	}
+
+	public function checkIfSupplyLedgerExists()
 	{
 		if(Request::ajax())
 		{
-			try{
-				$quantity = $this->sanitizeString(Input::get('quantity'));
-				$reference = $this->sanitizeString(Input::get('reference'));
-				$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
-				$month = $this->sanitizeString(Input::get('date'));
-
-				$month = Carbon\Carbon::parse($month);
-
-				$supplyledger = SupplyLedger::where('issuequantity','=',$quantity)
-														->where('reference','=',$reference)
-														->where('stocknumber','=',$stocknumber)
-														->whereBetween('date',array($month->startOfMonth()->toDateString(),$month->endOfMonth()->toDateString()))
-														->get();
-
-				if($supplyledger->isNotEmpty())
-				{ 
-					return json_encode('duplicate');
-				}
-
-				return json_encode('success');
-			} catch (Exception $e) {
-				return json_encode('error');
-			}
-		} 
-	}
-
-	public function copy()
-	{
-		if(Request::ajax())
-		{
-			try{
-				$daystoconsume = $this->sanitizeString(Input::get('daystoconsume'));
-				$issuequantity = $this->sanitizeString(Input::get('quantity'));
-				$reference = $this->sanitizeString(Input::get('reference'));
-				$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
-				$date = $this->sanitizeString(Input::get('date'));
-
-
-				$supply = Supply::find($stocknumber);
-				$issueunitprice = $supply->unitprice;
-
-
-				$validator = Validator::make([	
-					'Date' => $date,
-					'Stock Number' => $stocknumber,
-					'Requisition and Issue Slip' => $reference,
-					'Issue Quantity' => $issuequantity,
-					'Issue Unitprice' => $issueunitprice,
-					'Days To Consume' => $daystoconsume
-				],SupplyLedger::$issueRules);
-
-				if($validator->fails())
-				{
-					return json_encode('error');
-				}
-
-				$transaction = new SupplyLedger;
-				$transaction->stocknumber = $stocknumber;
-				$transaction->reference = $reference;
-				$transaction->date = Carbon\Carbon::parse($date);
-				$transaction->receiptunitprice = $issueunitprice;
-				$transaction->issuequantity = $issuequantity;
-				$transaction->issueunitprice = $issueunitprice;
-				$transaction->daystoconsume = $daystoconsume;
-				$transaction->save();
-
-				return json_encode('success');
-			} catch (Exception $e) {
-				return json_encode('error');
-			}
+			$quantity = $this->sanitizeString(Input::get('quantity'));
+			$reference = $this->sanitizeString(Input::get('reference'));
+			$stocknumber = $this->sanitizeString(Input::get('stocknumber'));
+			$month = $this->sanitizeString(Input::get('date'));
+			return json_encode(SupplyLedger::isExistingRecord($reference,$stocknumber,$quantity,$month));
 		} 
 	}
 

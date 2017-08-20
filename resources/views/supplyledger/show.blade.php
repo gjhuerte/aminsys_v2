@@ -28,7 +28,6 @@ Supply Ledger | {{ $month }}
 			</ul>
 			<table class="table table-hover" id="supplyLedgerTable">
 				<thead>
-					<th>Stock Number</th>
 					<th>Reference</th>
 					<th>Receipt Quantity</th>
 					<th>Receipt Unit Price</th>
@@ -39,7 +38,6 @@ Supply Ledger | {{ $month }}
 				<tbody>
 				@foreach($supplyledger as $supplyledger)
 					<tr>
-						<td>{{ $supplyledger->stocknumber }}</td>
 						<td>{{ $supplyledger->reference }}</td>
 						<td>{{ $supplyledger->receiptquantity }}</td>
 						<td>{{ $supplyledger->receiptunitprice }}</td>

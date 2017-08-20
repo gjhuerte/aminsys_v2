@@ -69,8 +69,8 @@ Stock Card | Release
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
-					{{ Form::label('Reference ( Requisition and Issue Slip )') }}
-					{{ Form::text('reference',Input::old('reference'),[
+					{{ Form::label('Requisition and Issue Slip') }}
+					{{ Form::text('requisitionissueslip',Input::old('requisitionissueslip'),[
 						'class' => 'form-control'
 					]) }}
 				</div>

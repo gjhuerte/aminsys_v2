@@ -39,7 +39,7 @@ Supply Ledger
 				<thead>
 		            <tr rowspan="2">
 		                <th class="text-left" colspan="7">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-		                <th class="text-left" colspan="7">Fund Cluster:  <span style="font-weight:normal">{{ $supply->fundcluster }}</span> </th>
+		                <th class="text-left" colspan="7"></span> </th>
 		            </tr>
 		            <tr rowspan="2">
 		                <th class="text-left" colspan="7">Item:  <span style="font-weight:normal">{{ $supply->supplytype }}</span> </th>
@@ -140,7 +140,7 @@ Supply Ledger
 			language: {
 					searchPlaceholder: "Search..."
 			},
-			"dom": "<'row'<'col-sm-2'<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
+			"dom": "<'row'<'col-sm-2'B<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
 							"<'row'<'col-sm-12'tr>>" +
 							"<'row'<'col-sm-5'i><'col-sm-7'p>>",
 			"processing": true,

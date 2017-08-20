@@ -38,7 +38,11 @@ Stock Card
 				<thead>
 		            <tr rowspan="2">
 		                <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-		                <th class="text-left" colspan="4">Fund Cluster:  <span style="font-weight:normal">{{ $supply->fundcluster }}</span> </th>
+		                <th class="text-left" colspan="4">Fund Cluster:  <span style="font-weight:normal">
+		                @foreach($supply->purchaseorder as $supplypurchaseorder)
+		                {{ $supplypurchaseorder->fundcluster."," }}
+		                @endforeach
+		                </span> </th>
 		            </tr>
 		            <tr rowspan="2">
 		                <th class="text-left" colspan="4">Item:  <span style="font-weight:normal">{{ $supply->supplytype }}</span> </th>
@@ -76,8 +80,6 @@ Stock Card
 <script type="text/javascript">
 	$(document).ready(function() {
 
-		var balance = 0;
-
 		@if( Session::has("success-message") )
 			swal("Success!","{{ Session::pull('success-message') }}","success");
 		@endif
@@ -110,31 +112,7 @@ Stock Card
 								  		          <br />
 								                <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
 				                            `;
-                				},
-				                // customize: function ( win ) {
-				                //     $(win.document.body)
-				                //         .css( 'font-size', '10pt' )
-				                //         .prepend(
-				                //             `
-									           //  <tr rowspan="2">
-									           //      <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-									           //      <th class="text-left" colspan="4">Fund Cluster:  <span style="font-weight:normal">{{ $supply->fundcluster }}</span> </th>
-									           //  </tr>
-									           //  <tr rowspan="2">
-									           //      <th class="text-left" colspan="4">Item:  <span style="font-weight:normal">{{ $supply->supplytype }}</span> </th>
-									           //      <th class="text-left" colspan="4">Stock No.:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
-									           //  </tr>
-									           //  <tr rowspan="2">
-									           //      <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
-									           //      <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
-									           //  </tr>
-				                //             `
-				                //         );
-				 
-				                //     $(win.document.body).find( 'table' )
-				                //         .addClass( 'compact' )
-				                //         .css( 'font-size', 'inherit' );
-				                // }
+                				}
 
         					}
     				 ],
@@ -155,7 +133,7 @@ Stock Card
 			ajax: '{{ url("inventory/supply/$supply->stocknumber/stockcard/") }}',
 			columns: [
 					{ data: function(callback){
-						return moment(callback.date).format("MMM d YYYY")
+						return moment(callback.date).format("MMMM Do YYYY")
 					} },
 					{ data: "reference" },
 					{ data: function(callback){
@@ -176,17 +154,7 @@ Stock Card
 						else 
 							return callback.office
 					}},
-					{ data: function(callback){
-						if(callback.receiptquantity != null)
-						{
-							balance = balance + callback.receiptquantity
-							return balance.toString()
-						} else
-						{
-							balance = balance - callback.issuequantity
-							return balance.toString()
-						}
-					} },
+					{ data: "balancequantity" },
 					{ data: function(callback){
 						if(callback.daystoconsume == null || callback.daystoconsume == "")
 							return "N/A"
