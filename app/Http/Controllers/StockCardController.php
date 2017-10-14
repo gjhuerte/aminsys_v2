@@ -1,11 +1,12 @@
 <?php
 namespace App\Http\Controllers;
-	
+
 use App\Supply;
 use Validator;
 use Carbon;
 use DB;
 use Auth;
+use PDF;
 use Session;
 use App\SupplyTransaction;
 use App\Http\Controllers\Controller;
@@ -31,7 +32,8 @@ class StockCardController extends Controller {
 
 		$supply = Supply::find($stocknumber);
 		return View('stockcard.index')
-				->with('supply',$supply);
+				->with('supply',$supply)
+				->with('title',$supply->stocknumber);
 	}
 
 
@@ -44,7 +46,8 @@ class StockCardController extends Controller {
 	{
 		$supply = Supply::find($id);
 		return View('stockcard.create')
-				->with('supply',$supply);
+				->with('supply',$supply)
+				->with('title','Stock Card');
 	}
 
 
@@ -63,7 +66,7 @@ class StockCardController extends Controller {
 		$stocknumber = Input::get("stocknumber");
 		$receiptquantity = Input::get("quantity");
 
-		$validator = Validator::make([	
+		$validator = Validator::make([
 			'Stock Number' => $stocknumber,
 			'Purchase Order' => $purchaseorder,
 			'Delivery Receipt' => $deliveryreceipt,
@@ -141,7 +144,8 @@ class StockCardController extends Controller {
 		$balance = $balance->sum('receiptquantity') - $balance->sum('issuequantity');
 		return View('stockcard.release')
 				->with('supply',$supply)
-				->with('balance',$balance);
+				->with('balance',$balance)
+				->with('title','Stock Card');
 	}
 
 
@@ -160,7 +164,7 @@ class StockCardController extends Controller {
 		$office = $this->sanitizeString(Input::get('office'));
 		$daystoconsume = $this->sanitizeString(Input::get('daystoconsume'));
 
-		$validator = Validator::make([	
+		$validator = Validator::make([
 			'Stock Number' => $stocknumber,
 			'Requisition and Issue Slip' => $reference,
 			'Date' => $date,
@@ -184,7 +188,8 @@ class StockCardController extends Controller {
 
 	public function batchAcceptForm()
 	{
-		return View('stockcard.batch.accept');
+		return view('stockcard.batch.accept')
+		->with('title','Batch Accept');
 	}
 
 	public function batchAccept()
@@ -199,7 +204,7 @@ class StockCardController extends Controller {
 
 		foreach($stocknumber as $_stocknumber)
 		{
-			$validator = Validator::make([	
+			$validator = Validator::make([
 				'Stock Number' => $_stocknumber,
 				'Purchase Order' => $purchaseorder,
 				'Date' => $date,
@@ -219,7 +224,7 @@ class StockCardController extends Controller {
 						->withErrors($validator);
 			}
 		}
-			
+
 		$username = Auth::user()->firstname . " " . Auth::user()->middlename . " " . Auth::user()->lastname;
 		$date = Carbon\Carbon::parse($date);
 
@@ -234,7 +239,8 @@ class StockCardController extends Controller {
 
 	public function batchReleaseForm()
 	{
-		return View('stockcard.batch.release');
+		return view('stockcard.batch.release')
+			->with('title','Batch Release');
 	}
 
 	public function batchRelease()
@@ -249,7 +255,7 @@ class StockCardController extends Controller {
 
 		foreach($stocknumber as $_stocknumber)
 		{
-			$validator = Validator::make([	
+			$validator = Validator::make([
 				'Stock Number' => $stocknumber,
 				'Requisition and Issue Slip' => $reference,
 				'Date' => $date,
@@ -303,6 +309,44 @@ class StockCardController extends Controller {
 			$stocknumber = $this->sanitizeString(Input::get('term'));
 			return json_encode(Supply::where('stocknumber','like','%'.$stocknumber.'%')->pluck('stocknumber')->toArray());
 		}
+	}
+
+	public function printStockCard($stocknumber)
+	{
+		// if(Request::ajax())
+		// {
+		// 		return json_encode([
+		// 			'data' => SupplyTransaction::where('stocknumber','=',$stocknumber)
+		// 										->orderBy('date','asc')
+		// 										->get()
+		// 		]);
+		// }
+
+		$supply = Supply::find($stocknumber);
+		$supplytransaction = SupplyTransaction::where('stocknumber','=',$stocknumber)
+									->orderBy('date','asc')
+									->get();
+
+		if(Request::ajax())
+		{
+				return view('stockcard.print_index')
+								->with('supply',$supply)
+								->with('supplytransaction',$supplytransaction);
+		}
+
+		$pdf = PDF::loadView('stockcard.print_index',['supply' => $supply, 'supplytransaction' => $supplytransaction ]);
+		return $pdf->download('stockcard.pdf');
+
+		// return view('stockcard.print_index')
+		// 				->with('supply',$supply)
+		// 				->with('supplytransaction',$supplytransaction);
+
+		// $html =  view('stockcard.print_index')
+		// 				->with('supply',$supply)
+		// 				->with('supplytransaction',$supplytransaction)
+		// 				->render();
+
+		// return PDF::load($html)->show();
 	}
 
 

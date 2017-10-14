@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function(){
 	Route::get('get/inventory/supply/stocknumber','StockCardController@getSupplyStockNumber');
 
 	/*
-	*	
+	*
 	* Office Modules
 	*/
 	Route::get('get/office/code/all','OfficeController@getAllCodes');
@@ -53,8 +53,6 @@ Route::middleware(['auth'])->group(function(){
 	Route::resource('maintenance/supply','SupplyController');
 
 	Route::resource('maintenance/office','OfficeController');
-
-	Route::resource('maintenance/item/type','ItemTypeController');
 
 	Route::post('get/supplyledger/checkifexisting',[
 		'as' => 'supplyledger.checkifexisting',
@@ -99,6 +97,8 @@ Route::middleware(['auth','amo'])->group(function(){
 
 	Route::get('inventory/supply/{id}/stockcard/release','StockCardController@releaseForm');
 
+	Route::get('inventory/supply/{id}/stockcard/print','StockCardController@printStockCard');
+
 	Route::resource('inventory/supply.stockcard','StockCardController');
 
 });
@@ -141,6 +141,10 @@ Route::middleware(['auth','admin'])->group(function(){
 			'as' => 'account.accesslevel.update',
 			'uses' => 'AccountsController@changeAccessLevel'
  		]);
+});
+
+Route::middleware(['auth','offices'])->group(function(){
+	Route::resource('request','RequestController');
 });
 
 Auth::routes();

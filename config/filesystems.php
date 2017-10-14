@@ -63,6 +63,23 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+        ],
+
+         // used for Backpack/BackupManager
+        'backups' => [
+            'driver' => 'local',
+            'root'   => storage_path('backups'), // that's where your backups are stored by default: storage/backups
+        ],
+
+        // used for Backpack/LogManager
+        'storage' => [
+            'driver' => 'local',
+            'root'   => storage_path('backup_logs'),
+        ],
+
     ],
 
 ];

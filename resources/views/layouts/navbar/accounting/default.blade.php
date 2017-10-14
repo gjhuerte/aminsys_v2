@@ -46,7 +46,7 @@
           <!-- dropdown items -->
           <ul class="dropdown-menu">
             <li>{{ link_to('report/rsmi','RSMI') }}</li>
-            <li>{{ link_to('report/fundcluster','Fund Cluster') }}</li>
+            <!-- <li>{{ link_to('report/fundcluster','Fund Cluster') }}</li> -->
           </ul> <!-- end of dropdown items -->
         </li>
 

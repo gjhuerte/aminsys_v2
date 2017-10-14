@@ -14,41 +14,57 @@ class UserTableSeeder extends Seeder {
 	{
 		//delete users table records
 		DB::table('user')->delete();
-		DB::table('user')->truncate();
 		//insert some dummy records
 
-		User::create(array(
-		   'username' => 'amo',
-		   'password' => Hash::make('12345678'),
-		   'accesslevel' =>'0',
-			 'firstname' => 'Assets',
-			 'middlename' => 'Management',
-			 'lastname' => 'Office',
-			 'email' => 'amo@yahoo.com',
-		   'status' =>'1'
-		));
+		DB::table('user')->insert([
+			array(
+				'username' => 'admin',
+				'password' => Hash::make('12345678'),
+				'accesslevel' =>'0',
+				'firstname' => 'Elliot',
+				'middlename' => '',
+				'lastname' => 'Alderson',
+				'email' => 'elliotalderson@yahoo.com',
+				'status' =>'1',
+				'office' => 'ICTO'
+			),
 
-		User::create(array(
-		   'username' => 'accounting',
-		   'password' => Hash::make('12345678'),
-		   'accesslevel' =>'1',
-			 'firstname' => 'Accounting',
-			 'middlename' => '',
-			 'lastname' => 'Office',
-			 'email' => 'accountingoffice@yahoo.com',
-		   'status' =>'1'
-		));
+			array(
+				'username' => 'amo',
+				'password' => Hash::make('12345678'),
+				'accesslevel' =>'1',
+				'firstname' => 'Tyrion',
+				'middlename' => '',
+				'lastname' => 'Lannister',
+				'email' => 'tyrionlannister@yahoo.com',
+				'status' =>'1',
+				'office' => 'AMO'
+			),
 
-		User::create(array(
-		   'username' => 'admin',
-		   'password' => Hash::make('12345678'),
-		   'accesslevel' =>'2',
-			 'firstname' => 'Administrator',
-			 'middlename' => '',
-			 'lastname' => 'Only',
-			 'email' => 'pedropandesal@yahoo.com',
-		   'status' =>'1'
-		));
+			array(
+				'username' => 'accounting',
+				'password' => Hash::make('12345678'),
+				'accesslevel' =>'2',
+				'firstname' => 'Skyler',
+				'middlename' => '',
+				'lastname' => 'White',
+				'email' => 'skylerwhite@yahoo.com',
+				'status' =>'1',
+				'office' => 'ACC'
+			),
+
+			array(
+				'username' => 'ccis',
+				'password' => Hash::make('12345678'),
+				'accesslevel' =>'3',
+				'firstname' => 'Carlo',
+				'middlename' => '',
+				'lastname' => 'Inovero',
+				'email' => 'pup.ccis.server@gmail.com',
+				'status' =>'3',
+				'office' => 'CCIS'
+			)
+		]);
 	}
 
 

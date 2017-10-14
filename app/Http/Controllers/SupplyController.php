@@ -23,7 +23,8 @@ class SupplyController extends Controller {
 				'data' => Supply::all()
 			]);
 		}
-		return view('maintenance.supply.index');
+		return view('maintenance.supply.index')
+                ->with('title','Supply Maintenance');
 	}
 
 
@@ -34,7 +35,8 @@ class SupplyController extends Controller {
 	 */
 	public function create()
 	{
-		return view('maintenance.supply.create');
+		return view('maintenance.supply.create')
+                ->with('title','Supply Maintenance');
 	}
 
 
@@ -114,7 +116,8 @@ class SupplyController extends Controller {
 	{
 		$supply = Supply::find($id);
 		return view('maintenance.supply.edit')
-				->with('supply',$supply);
+				->with('supply',$supply)
+                ->with('title','Supply Maintenance');
 	}
 
 

@@ -20,20 +20,20 @@
                 <div class="navbar-header">
 
                     <!-- Collapsed Hamburger -->
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+          {{--           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
                         <span class="sr-only">Toggle Navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
-                    </button>
+                    </button> --}}
 
                     <!-- Branding Image -->
                     <a class="" href="{{ url('/') }}" style="margin: 10px;">
                         <div style="color: #800000;margin:0;padding:0;">
-                            <div class="col-md-4">
+                            <div class="col-lg-4">
                                 <img src="{{ asset('images/logo.png') }}" style="height: 64px;width:auto;" />
                             </div>
-                            <div class="col-md-8" style="font-size: 12px;white-space:nowrap;margin:0px;padding:0px;">
+                            <div class="col-lg-8" style="font-size: 12px;white-space:nowrap;margin:0px;padding:0px;">
                                 <div class="row">
                                     <h5><strong>Polytechnic University Of the Philippines</strong></h5>
                                 </div>

@@ -1,40 +1,49 @@
-@extends('layouts.master')
-@section('title')
-Supply Ledger
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-{{ HTML::style(asset('css/buttons.bootstrap.min.css')) }}
-{{ HTML::style(asset('css/buttons.dataTables.min.css')) }}
-{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-	#page-body{
-		display: none;
-	}
+@extends('backpack::layout')
 
-	a > hover{
-		text-decoration: none;
-	}
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		{{ HTML::style(asset('css/buttons.bootstrap.min.css')) }}
+		{{ HTML::style(asset('css/buttons.dataTables.min.css')) }}
+		{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
+		<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+		<style>
+			#page-body{
+				display: none;
+			}
 
-	th , tbody{
-		text-align: center;
-	}
-</style>
-@stop
+			a > hover{
+				text-decoration: none;
+			}
+
+			th , tbody{
+				text-align: center;
+			}
+		</style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Supply Ledger Summary</h3></legend>
+		<ul class="breadcrumb">
+			<li><a href="{{ url('inventory/supply') }}">Inventory</a></li>
+			<li class="active">{{ $supply->stocknumber }}</li>
+			<li class="active">Supply Ledger</li>
+			<li class="active">Summary</li>
+		</ul>
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-	<div class="panel panel-default">
-		<div class="panel-body table-responsive">	
-			<legend><h3 class="text-muted">Supply Ledger Summary</h3></legend>
-			<ul class="breadcrumb">
-				<li><a href="{{ url('inventory/supply') }}">Inventory</a></li>
-				<li class="active">{{ $supply->stocknumber }}</li>
-				<li class="active">Supply Ledger</li>
-				<li class="active">Summary</li>
-			</ul>
+<!-- Default box -->
+  <div class="box" style="padding:10px;">
+    <div class="box-body">
+		<div class="panel panel-body table-responsive">
 			<table class="table table-hover table-striped table-bordered table-condensed" id="inventoryTable" cellspacing="0" width="100%">
 				<thead>
 		            <tr rowspan="2">
@@ -74,152 +83,166 @@ Supply Ledger
 				</thead>
 			</table>
 		</div>
-	</div>
-</div>
-@stop
-@section('script')
-{{ HTML::script(asset('js/dataTables.select.min.js')) }}
-{{ HTML::script(asset('js/dataTables.buttons.min.js')) }}
-{{ HTML::script(asset('js/buttons.html5.min.js')) }}
-{{ HTML::script(asset('js/buttons.print.min.js')) }}
-{{ HTML::script(asset('js/jszip.min.js')) }}
-{{ HTML::script(asset('js/pdfmake.min.js')) }}
-{{ HTML::script(asset('js/vfs_fonts.js')) }}
-{{ HTML::script(asset('js/buttons.bootstrap.min.js')) }}
-<script type="text/javascript">
-	$(document).ready(function() {
 
-		var quantity = 0;
-		var unitcost = 0;
-		var totalcost = 0;
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
 
-		@if( Session::has("success-message") )
-			swal("Success!","{{ Session::pull('success-message') }}","success");
-		@endif
-		@if( Session::has("error-message") )
-			swal("Oops...","{{ Session::pull('error-message') }}","error");
-		@endif
+@endsection
 
-	    var table = $('#inventoryTable').DataTable({
-			"pageLength": 50,
-			select: {
-				style: 'single'
-			},
-        	lengthChange: false,
-        	buttons: [ 
-        					'excel', 
-        					{
-	    						extend: 'print',
-	    						title: '*',
-	    						messageBottom: "*** Nothing Follows ***",
-                				message: function(){
-                					return `
-								                <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
-									            <br />
-								                <th class="text-left" colspan="4">Fund Cluster:  <span style="font-weight:normal">{{ $supply->fundcluster }}</span> </th>
-								                <br />
-								                <th class="text-left" colspan="4">Item:  <span style="font-weight:normal">{{ $supply->supplytype }}</span> </th>
-								                <th class="text-left" colspan="4">Stock No.:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
-									            <br />
-								                <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
-								  		          <br />
-								                <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
-				                            `;
-                				},
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
 
-        					}
-    				 ],
-			initComplete : function () {
-     			table.buttons().container()
-        			.appendTo( 'div.print' );			
-    		},
-			"columnDefs":[
-				{ "type": "date", "targets": 0 },
-				{ targets: 'no-sort', orderable: false }
-			],
-			language: {
-					searchPlaceholder: "Search..."
-			},
-			"dom": "<'row'<'col-sm-2'B<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
-							"<'row'<'col-sm-12'tr>>" +
-							"<'row'<'col-sm-5'i><'col-sm-7'p>>",
-			"processing": true,
-			ajax: '{{ url("inventory/supply/$supply->stocknumber/supplyledger/") }}',
-			columns: [
-					{ data: "date" },
-					{ data: function(){
-						return ""
-					} },
-					{ data: "receiptquantity"},
-					{ data: function(callback){
-						try{
-							return parseInt(callback.receiptunitprice).toFixed(2)
-						} catch(e) { quantity = 0; return null }
-					} },
-					{ data: function(callback){
-						try {
-							return (callback.receiptquantity * callback.receiptunitprice).toFixed(2);
-						} catch (e) { return null }
-					} },
-					{ data: "issuequantity" },
-					{ data: function(callback){
-						try{
-							return parseInt(callback.issueunitprice)
-						} catch(e) { quantity = 0; return null }
-					} },
-					{ data: function(callback){
-						try {
-							return (callback.issuequantity * callback.issueunitprice).toFixed(2);
-						} catch (e) { return null } 
-					} },
-					{ data: function(callback){
-						try{
-							quantity = quantity + (callback.receiptquantity - callback.issuequantity)
-							return quantity.toFixed(2)
-						} catch(e) { quantity = 0; return null }
-					} },
-					{ data: function(callback){
-						try{
-							unitcost = ((callback.receiptquantity * callback.receiptunitprice) - (callback.issuequantity * callback.issueunitprice)) / quantity
-							return unitcost.toFixed(2)
-						} catch(e) { unitcost = 0; return null }
-					} },
-					{ data: function(callback){
-						try{
-							return (quantity * unitcost).toFixed(2);
-						} catch (e) { return null }
-					} },
-					{ data: function(){
-						return ""
-					} },
-					{ data: function(callback){
-						url = '{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}' + '/' + callback.date 
-						return "<a type='button' href='" + url + "' class='btn btn-default btn-sm'>View</a>"
-					} },
-			],
-	    });
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+		{{ HTML::script(asset('js/dataTables.select.min.js')) }}
+		{{ HTML::script(asset('js/dataTables.buttons.min.js')) }}
+		{{ HTML::script(asset('js/buttons.html5.min.js')) }}
+		{{ HTML::script(asset('js/buttons.print.min.js')) }}
+		{{ HTML::script(asset('js/jszip.min.js')) }}
+		{{ HTML::script(asset('js/pdfmake.min.js')) }}
+		{{ HTML::script(asset('js/vfs_fonts.js')) }}
+		{{ HTML::script(asset('js/buttons.bootstrap.min.js')) }}
+	<script type="text/javascript">
+			$(document).ready(function() {
 
-	 	$("div.toolbar").html(`
-			<button id="accept" class="btn btn-sm btn-success">
-				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				<span id="nav-text"> Accept</span>
-			</button>
-			<button id="release" class="btn btn-sm btn-danger">
-				<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
-				<span id="nav-text"> Release</span>
-			</button>
-		`);
+				var quantity = 0;
+				var unitcost = 0;
+				var totalcost = 0;
 
-		$('#accept').on('click',function(){
-			window.location.href = "{{ url('inventory/supply') }}" + '/' + "{{ $supply->stocknumber }}" + '/supplyledger/create'
-		});
+				@if( Session::has("success-message") )
+					swal("Success!","{{ Session::pull('success-message') }}","success");
+				@endif
+				@if( Session::has("error-message") )
+					swal("Oops...","{{ Session::pull('error-message') }}","error");
+				@endif
 
-		$('#release').on('click',function(){
-			window.location.href = "{{ url('inventory/supply') }}" + '/' + "{{ $supply->stocknumber }}" + '/supplyledger/release'
-		});
+			    var table = $('#inventoryTable').DataTable({
+					"pageLength": 50,
+					select: {
+						style: 'single'
+					},
+		        	lengthChange: false,
+		        	buttons: [
+		        					'excel',
+		        					{
+			    						extend: 'print',
+						                exportOptions: {
+						                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+						                },
+			    						title: '*',
+			    						messageBottom: "*** Nothing Follows ***",
+		                				message: function(){
+		                					return `
+										                <th class="text-left" colspan="4">Entity Name:  <span style="font-weight:normal">{{ $supply->entityname }}</span> </th>
+											            <br />
+										                <th class="text-left" colspan="4">Fund Cluster:  <span style="font-weight:normal">{{ $supply->fundcluster }}</span> </th>
+										                <br />
+										                <th class="text-left" colspan="4">Item:  <span style="font-weight:normal">{{ $supply->supplytype }}</span> </th>
+										                <th class="text-left" colspan="4">Stock No.:  <span style="font-weight:normal">{{ $supply->stocknumber }}</span> </th>
+											            <br />
+										                <th class="text-left" colspan="4">Unit Of Measurement:  <span style="font-weight:normal">{{ $supply->unit }}</span>  </th>
+										  		          <br />
+										                <th class="text-left" colspan="4">Reorder Point: <span style="font-weight:normal">{{ $supply->reorderpoint }}</span> </th>
+						                            `;
+		                				},
 
-		$('#page-body').show();
-	} );
+		        					}
+		    				 ],
+					initComplete : function () {
+		     			table.buttons().container()
+		        			.appendTo( 'div.print' );
+		    		},
+					"columnDefs":[
+						{ "type": "date", "targets": 0 },
+						{ targets: 'no-sort', orderable: false }
+					],
+					language: {
+							searchPlaceholder: "Search..."
+					},
+					"dom": "<'row'<'col-sm-2'B<'print'>><'col-sm-7'<'toolbar'>><'col-sm-3'f>>" +
+									"<'row'<'col-sm-12'tr>>" +
+									"<'row'<'col-sm-5'i><'col-sm-7'p>>",
+					"processing": true,
+					ajax: '{{ url("inventory/supply/$supply->stocknumber/supplyledger/") }}',
+					columns: [
+							{ data: "date" },
+							{ data: function(){
+								return ""
+							} },
+							{ data: "receiptquantity"},
+							{ data: function(callback){
+								try{
+									return parseInt(callback.receiptunitprice).toFixed(2)
+								} catch(e) { quantity = 0; return null }
+							} },
+							{ data: function(callback){
+								try {
+									return (callback.receiptquantity * callback.receiptunitprice).toFixed(2);
+								} catch (e) { return null }
+							} },
+							{ data: "issuequantity" },
+							{ data: function(callback){
+								try{
+									return parseInt(callback.issueunitprice)
+								} catch(e) { quantity = 0; return null }
+							} },
+							{ data: function(callback){
+								try {
+									return (callback.issuequantity * callback.issueunitprice).toFixed(2);
+								} catch (e) { return null }
+							} },
+							{ data: function(callback){
+								try{
+									quantity = callback.balancequantity
+									return quantity;
+								} catch(e) { quantity = 0; return null }
+							} },
+							{ data: function(callback){
+								try{
+									unitcost = (parseInt(callback.issueunitprice) + parseInt(callback.receiptunitprice)) / 2
+									return unitcost
+								} catch(e) { unitcost = 0; return null }
+							} },
+							{ data: function(callback){
+								try{
+									return (quantity * unitcost).toFixed(2);
+								} catch (e) { return null }
+							} },
+							{ data: function(){
+								return ""
+							} },
+							{ data: function(callback){
+								url = '{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}' + '/' + callback.date
+								return "<a type='button' href='" + url + "' class='btn btn-default btn-sm'>View</a>"
+							} },
+					],
+			    });
+
+			 	$("div.toolbar").html(`
+					<button id="accept" class="btn btn-sm btn-success">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+						<span id="nav-text"> Accept</span>
+					</button>
+					<button id="release" class="btn btn-sm btn-danger">
+						<span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>
+						<span id="nav-text"> Release</span>
+					</button>
+				`);
+
+				$('#accept').on('click',function(){
+					window.location.href = "{{ url('inventory/supply') }}" + '/' + "{{ $supply->stocknumber }}" + '/supplyledger/create'
+				});
+
+				$('#release').on('click',function(){
+					window.location.href = "{{ url('inventory/supply') }}" + '/' + "{{ $supply->stocknumber }}" + '/supplyledger/release'
+				});
+
+				$('#page-body').show();
+			} );
 </script>
-@stop
-	
+@endsection

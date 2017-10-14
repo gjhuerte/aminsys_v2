@@ -1,6 +1,6 @@
 <?php
 namespace App\Http\Controllers;
-	
+
 use App\Office;
 use Carbon;
 use Session;
@@ -23,7 +23,8 @@ class OfficeController extends Controller {
 				'data' => Office::all()
 			]);
 		}
-		return view('maintenance.office.index');
+		return view('maintenance.office.index')
+					->with('title','Office');
 	}
 
 
@@ -34,7 +35,8 @@ class OfficeController extends Controller {
 	 */
 	public function create()
 	{
-		return view('maintenance.office.create');
+		return view('maintenance.office.create')
+					->with('title','Office');
 	}
 
 
@@ -51,7 +53,7 @@ class OfficeController extends Controller {
 
 		$validator = Validator::make([
 			'Department Name' => $deptname,
-			'Department Code' => $deptcode 
+			'Department Code' => $deptcode
 		],Office::$rules);
 
 		if($validator->fails())
@@ -79,7 +81,7 @@ class OfficeController extends Controller {
 	 */
 	public function show($id)
 	{
-		
+
 	}
 
 
@@ -93,7 +95,8 @@ class OfficeController extends Controller {
 	{
 		$office = Office::find($id);
 		return view("maintenance.office.edit")
-				->with('office',$office);
+				->with('office',$office)
+				->with('title','Office');
 	}
 
 
@@ -110,7 +113,7 @@ class OfficeController extends Controller {
 
 		$validator = Validator::make([
 			'Department Name' => $deptname,
-			'Department Code' => $deptcode 
+			'Department Code' => $deptcode
 		],Office::$rules);
 
 		if($validator->fails())
@@ -145,13 +148,14 @@ class OfficeController extends Controller {
 			return json_encode('success');
 		}
 
-		try{
+		try
+		{
 			$office = Office::find($id);
 			$office->delete();
-			Session::flash('success-message','Office Removed');	
+			Session::flash('success-message','Office Removed');
 		} catch (Exception $e) {
 			Session::flash('error-message','Problem Encountered While Processing Your Data');
-		} 
+		}
 		return redirect('maintenance/office');
 	}
 

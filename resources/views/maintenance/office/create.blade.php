@@ -1,35 +1,47 @@
-@extends('layouts.master')
-@section('title')
-Office | Create
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-  #page-two, #page-body{
-    display: none;
-  }
-</style>
+@extends('backpack::layout')
+
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+    <style>
+      #page-two, #page-body{
+        display: none;
+      }
+    </style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
 @endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Offices</h3></legend>
+	  {{-- <ol class="breadcrumb">
+	    <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/dashboard') }}">Das</a></li>
+	    <li class="active">{{ trans('backpack::backup.backup') }}</li>
+	  </ol> --}}
+	</section>
+@endsection
+
 @section('content')
-{{ Form::open(array('class' => 'form-horizontal','method'=>'post','route'=>'office.store','id'=>'officeForm')) }}
-<div class="container-fluid" id="page-body">
-  <div class="row">
-    <div class="col-md-offset-3 col-md-6">
-      <div class="panel panel-body ">
-        @if (count($errors) > 0)
-            <div class="alert alert-danger alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <ul style='margin-left: 10px;'>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        <div id="page-one">
+<!-- Default box -->
+  <div class="box">
+    <div class="box-body">
+        {{ Form::open(array('class' => 'col-md-offset-3 col-md-6  form-horizontal','method'=>'post','route'=>'office.store','id'=>'officeForm')) }}
+            @if (count($errors) > 0)
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <ul style='margin-left: 10px;'>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        <div class="" style="padding:10px;">
           <ol class="breadcrumb">
               <li>
                   <a href="{{ url('maintenance/office') }}">Office</a>
@@ -61,26 +73,27 @@ Office | Create
               </button>
             </div>
           </div>
-        </div> <!-- end of page one -->
       </div> <!-- centered  -->
-    </div>
-  </div>
-</div><!-- Container -->
-{{ Form::close() }}
-@stop
-@section('script')
+      {{ Form::close() }}
+
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
+
+@endsection
+
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
+
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+
 <script>
   $(document).ready(function(){
-
-    $('#next').click(function(){
-      $('#page-one').hide(400);
-      $('#page-two').show(400);
-    });
-
-    $('#previous').click(function(){
-      $('#page-two').hide(400);
-      $('#page-one').show(400);
-    });
 
     @if( Session::has("success-message") )
         swal("Success!","{{ Session::pull('success-message') }}","success");
@@ -93,4 +106,4 @@ Office | Create
     $('#page-body').show();
   });
 </script>
-@stop
+@endsection

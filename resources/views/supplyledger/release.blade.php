@@ -1,33 +1,46 @@
-@extends('layouts.master')
-@section('title')
-Supply Ledger | Release
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-	#page-body{
-		display: none;
-	}
+@extends('backpack::layout')
 
-	a > hover{
-		text-decoration: none;
-	}
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
+		<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+		<style>
+			#page-body{
+				display: none;
+			}
 
-	th , tbody{
-		text-align: center;
-	}
-</style>
-@stop
+			a > hover{
+				text-decoration: none;
+			}
+
+			th , tbody{
+				text-align: center;
+			}
+		</style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Supply Ledger</h3></legend>
+		<ul class="breadcrumb">
+			<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
+			<li><a href="{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}">{{ $supply->stocknumber }}</a></li>
+			<li class="active">Issue</li>
+		</ul>
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-	<div class="col-md-offset-3 col-md-6 panel">
-		<div class="panel-body">
-			{{ Form::open(['method'=>'delete','route'=>array('supply.supplyledger.destroy',$supply->stocknumber,$supply->stocknumber),'class'=>'form-horizontal','id'=>'releaseForm']) }}
-			<legend><h3 class="text-muted">Supply Ledger</h3></legend>
+<!-- Default box -->
+  <div class="box" style="padding:10px;">
+    <div class="box-body">
+			{{ Form::open(['method'=>'delete','route'=>array('supply.supplyledger.destroy',$supply->stocknumber,$supply->stocknumber),'class'=>'col-sm-offset-3 col-sm-6 form-horizontal','id'=>'releaseForm']) }}
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">
 	            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -38,15 +51,10 @@ Supply Ledger | Release
 	                </ul>
 	            </div>
 	        @endif
-			<ul class="breadcrumb">
-				<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-				<li><a href="{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}">{{ $supply->stocknumber }}</a></li>
-				<li class="active">Issue</li>
-			</ul>
 			<div class="col-md-12">
 				<div class="form-group">
 					{{ Form::label('Item Information') }}
-					<div class="alert alert-warning">
+					<div class="alert alert-default">
 						<ul class="list-unstyled">
 							<li><strong>Entity Name:</strong> {{ $supply->entityname }}</li>
 							<li><strong>Item:</strong> {{ $supply->supplytype }}</li>
@@ -87,6 +95,15 @@ Supply Ledger | Release
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
+					{{ Form::label('Issued Unit price') }}
+					{{ Form::number('unitprice',Input::old('unitprice'),[
+						'id' => 'unitprice',
+						'class' => 'form-control'
+					]) }}
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="form-group">
 					{{ Form::label('Days To Consume') }}
 					{{ Form::textarea('daystoconsume',Input::old('daystoconsume'),[
 						'class' => 'form-control',
@@ -99,12 +116,24 @@ Supply Ledger | Release
 				<button type="button" id="cancel" class="btn btn-md btn-default">Cancel</button>
 			</div>
 			{{ Form::close() }}
-		</div>
-	</div>
-</div>
-@stop
-@section('script-include')
-{{ HTML::script(asset('js/moment.min.js')) }}
+
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
+
+@endsection
+
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
+
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+		{{ HTML::script(asset('js/moment.min.js')) }}
+
 <script>
 $('document').ready(function(){
 
@@ -170,9 +199,8 @@ $('document').ready(function(){
 	@if( Session::has("error-message") )
 		swal("Oops...","{{ Session::pull('error-message') }}","error");
 	@endif
-	
+
 	$('#page-body').show()
 })
 </script>
-@stop
-	
+@endsection

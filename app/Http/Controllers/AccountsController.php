@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use App\User;
 use Auth;
 use Hash;
@@ -27,7 +28,8 @@ class AccountsController extends Controller {
 				'data' => User::all()
 			]);
 		}
-		return view('account.index');
+		return view('account.index')
+				->with('title','Accounts');
 	}
 
 
@@ -38,7 +40,9 @@ class AccountsController extends Controller {
 	 */
 	public function create()
 	{
-		return view('account.create');
+		return view('account.create')
+				->with('title','Accounts')
+				->with('office',App\Office::pluck('deptname','deptcode'));
 	}
 
 
@@ -57,6 +61,7 @@ class AccountsController extends Controller {
 		$email = $this->sanitizeString(Input::get('email'));
 		$password = $this->sanitizeString(Input::get('password'));
 		$type = $this->sanitizeString(Input::get('type'));
+		$office = $this->sanitizeString(Input::get('office'));
 
 		$validator = Validator::make([
 			'Lastname' => $lastname,
@@ -64,7 +69,8 @@ class AccountsController extends Controller {
 			'Middlename' => $middlename,
 			'Username' => $username,
 			'Email' => $email,
-			'Password' => $password
+			'Password' => $password,
+			'Office' => $office
 		],User::$rules);
 
 		if($validator->fails())
@@ -80,14 +86,19 @@ class AccountsController extends Controller {
 		$user->middlename = $middlename;
 		$user->username = $username;
 		$user->email = $email;
+		$user->office = $office;
 		$user->password = Hash::make($password);
 		$user->status = '1';
-		if($type == 'amo')
-		$user->accesslevel = '0';
-		if($type == 'accounting')
-		$user->accesslevel = '1';
+
 		if($type == 'admin')
+		$user->accesslevel = '0';
+		if($type == 'amo')
+		$user->accesslevel = '1';
+		if($type == 'accounting')
 		$user->accesslevel = '2';
+		if($type == 'colleges')
+		$user->accesslevel = '3';
+
 		$user->save();
 
 		Session::flash("success-message","Account successfully created!");
@@ -106,7 +117,8 @@ class AccountsController extends Controller {
 	{
 		$user = User::find($id);
 		return view('account.show')
-			->with('person',$user);
+			->with('person',$user)
+			->with('title','Accounts');
 	}
 
 
@@ -121,7 +133,9 @@ class AccountsController extends Controller {
 		if(isset($id)){
 			$user = User::find($id);
 			return view('account.update')
-				->with('user',$user);
+				->with('user',$user)
+				->with('title','Accounts')
+				->with('office',App\Office::pluck('deptname','deptcode'));
 		}
 	}
 
@@ -139,12 +153,14 @@ class AccountsController extends Controller {
 		$middlename = $this->sanitizeString(Input::get('middlename'));
 		$email = $this->sanitizeString(Input::get('email'));
 		$username = $this->sanitizeString(Input::get('username'));
+		$office = $this->sanitizeString(Input::get('office'));
 
 		$validator = Validator::make([
 			'Lastname' => $lastname,
 			'Firstname' => $firstname,
 			'Middlename' => $middlename,
 			'Email' => $email,
+			'Office' => $office,
 			'Username' => 'sampleusernameonly',
 		],User::$informationRules);
 
@@ -160,6 +176,7 @@ class AccountsController extends Controller {
 		$user->lastname = $lastname;
 		$user->firstname = $firstname;
 		$user->middlename = $middlename;
+		$user->office = $office;
 		$user->email = $email;
 
 		$user->save();
@@ -181,11 +198,16 @@ class AccountsController extends Controller {
 			try{
 
 				$user = User::select('id')->get();
-				if($id == Auth::user()->id){
+				if($id == Auth::user()->id)
+				{
 					return json_encode('self');
-				}else if(count($user) <= 1){
+				}
+				else if(count($user) <= 1)
+				{
 					return json_encode('invalid');
-				}else{
+				}
+				else
+				{
 					$user = User::find($id);
 					if($user->accesslevel == 2)
 						return json_encode('invalid');
@@ -205,7 +227,7 @@ class AccountsController extends Controller {
 		Session::flash('success-message','Account deleted!');
 		return redirect('account/view/delete');
 	}
-	
+
 	/**
 	 * Change User Password to Default '12345678'
 	 *
@@ -230,14 +252,16 @@ class AccountsController extends Controller {
 		$id = $this->sanitizeString(Input::get("id"));
 		$access = $this->sanitizeString(Input::get('newaccesslevel'));
 
-		try {
+		try
+		{
 
-			if(Auth::user()->accesslevel != 2){
+			if(Auth::user()->accesslevel != 0)
+			{
 
-				Session::flash('error-message','You do not have enough priviledge to switch to this level');
+				Session::flash('error-message','You do not have enough priviledge to change the users access level');
 				return redirect('account');
 			}
-			
+
 			$user = User::find($id);
 			$user->accesslevel = $access;
 			$user->save();

@@ -14,7 +14,7 @@ class CreateOfficeTable extends Migration {
 	{
 		Schema::create('office', function(Blueprint $table)
 		{
-			$table->string('deptcode',20)->primarykey();
+			$table->string('deptcode',20)->primary();
 			$table->string('deptname',100)->unique();
 		});
 	}

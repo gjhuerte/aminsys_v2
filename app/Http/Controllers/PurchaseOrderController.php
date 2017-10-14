@@ -29,7 +29,8 @@ class PurchaseOrderController extends Controller
             ]);
         }
 
-        return view('purchaseorder.index');
+        return view('purchaseorder.index')
+                ->with('title','Purchase Order');
     }
 
     /**
@@ -39,7 +40,8 @@ class PurchaseOrderController extends Controller
      */
     public function create()
     {
-        return view('purchaseorder.create');
+        return view('purchaseorder.create')
+                ->with('title','Purchase Order');
     }
 
     /**
@@ -49,11 +51,11 @@ class PurchaseOrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store()
-    {   
-        
+    {
+        return Input::all();
         $stocknumber = Input::get('stocknumber');
         $details = $this->sanitizeString(Input::get('details'));
-        $fundcluster = $this->sanitizeString(Input::get('fundcluster'));    
+        $fundcluster = $this->sanitizeString(Input::get('fundcluster'));
         $date = $this->sanitizeString(Input::get('date'));
         $purchaseorderno = $this->sanitizeString(Input::get('po'));
         $quantity = Input::get('quantity');
@@ -116,7 +118,8 @@ class PurchaseOrderController extends Controller
 
         $purchaseorder = PurchaseOrder::find($id);
         return view('purchaseorder.show')
-                ->with('purchaseorder',$purchaseorder);
+                ->with('purchaseorder',$purchaseorder)
+                ->with('title',$purchaseorder->purchaseorderno);
     }
 
     /**

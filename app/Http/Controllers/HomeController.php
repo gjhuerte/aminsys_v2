@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
 
 class HomeController extends Controller
 {
@@ -23,6 +24,26 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('purchaseorder.index');
+        if(Auth::user()->accesslevel == 0)
+        {
+            return redirect('backup');
+        }
+
+        if(Auth::user()->accesslevel == 1)
+        {
+            return redirect('inventory/supply');
+        }
+
+        if(Auth::user()->accesslevel == 2)
+        {
+            return redirect('purchaseorder');
+        }
+
+        if(Auth::user()->accesslevel == 3)
+        {
+
+            return redirect('request');
+
+        }
     }
 }

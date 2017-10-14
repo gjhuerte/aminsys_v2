@@ -1,33 +1,46 @@
-@extends('layouts.master')
-@section('title')
-Supply Ledger | Accept
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-	#page-body{
-		display: none;
-	}
+@extends('backpack::layout')
 
-	a > hover{
-		text-decoration: none;
-	}
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
+		<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+		<style>
+			#page-body{
+				display: none;
+			}
 
-	th , tbody{
-		text-align: center;
-	}
-</style>
-@stop
+			a > hover{
+				text-decoration: none;
+			}
+
+			th , tbody{
+				text-align: center;
+			}
+		</style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Supply Ledger</h3></legend>
+		<ul class="breadcrumb">
+			<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
+			<li><a href="{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}">{{ $supply->stocknumber }}</a></li>
+			<li class="active">Accept</li>
+		</ul>
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-	<div class="col-md-offset-3 col-md-6 panel">
-		<div class="panel-body">
-			{{ Form::open(['method'=>'post','route'=>array('supply.supplyledger.store',$supply->stocknumber),'class'=>'form-horizontal','id'=>'acceptForm']) }}
-			<legend><h3 class="text-muted">Supply Ledger</h3></legend>
+<!-- Default box -->
+  <div class="box" style="padding:10px;">
+    <div class="box-body">
+			{{ Form::open(['method'=>'post','route'=>array('supply.supplyledger.store',$supply->stocknumber),'class'=>'col-sm-offset-3 col-sm-6 form-horizontal','id'=>'acceptForm']) }}
 	        @if (count($errors) > 0)
 	            <div class="alert alert-danger alert-dismissible" role="alert">
 	            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -38,15 +51,10 @@ Supply Ledger | Accept
 	                </ul>
 	            </div>
 	        @endif
-			<ul class="breadcrumb">
-				<li><a href="{{ url('inventory/supply') }}">Supply Inventory</a></li>
-				<li><a href="{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}">{{ $supply->stocknumber }}</a></li>
-				<li class="active">Accept</li>
-			</ul>
 			<div class="col-md-12">
 				<div class="form-group">
 					{{ Form::label('Item Information') }}
-					<div class="alert alert-warning">
+					<div class="alert alert-default">
 						<ul class="list-unstyled">
 							<li><strong>Entity Name:</strong> {{ $supply->entityname }}</li>
 							<li><strong>Item:</strong> {{ $supply->supplytype }}</li>
@@ -86,6 +94,14 @@ Supply Ledger | Accept
 			</div>
 			<div class="col-md-12">
 				<div class="form-group">
+					{{ Form::label('Receipt Unit Price') }}
+					{{ Form::number('unitprice',Input::old('unitprice'),[
+						'class' => 'form-control'
+					]) }}
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="form-group">
 					{{ Form::label('No Of Days To Consume') }}
 					{{ Form::textarea('daystoconsume',Input::old('daystoconsume'),[
 						'class' => 'form-control',
@@ -98,78 +114,88 @@ Supply Ledger | Accept
 				<button type="button" class="btn btn-md btn-default" id="cancel">Cancel</button>
 			</div>
 			{{ Form::close() }}
-		</div>
-	</div>
-</div>
-@stop
-@section('script-include')
-{{ HTML::script(asset('js/moment.min.js')) }}
-<script>
-$('document').ready(function(){
 
-	$('#reference').autocomplete({
-		source: "{{ url('get/purchaseorder/all') }}"
-	})
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
 
-	$( "#date" ).datepicker({
-		  changeMonth: true,
-		  changeYear: true,
-		  maxAge: 59,
-		  minAge: 15,
-	});
+@endsection
 
-	$('#cancel').on('click',function(){
-		window.location.href = "{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}"
-	})
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
 
-	$('#accept').on('click',function(){
-        swal({
-          title: "Are you sure?",
-          text: "This will no longer be editable once submitted. Do you want to continue?",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Yes, submit it!",
-          cancelButtonText: "No, cancel it!",
-          closeOnConfirm: false,
-          closeOnCancel: false
-        },
-        function(isConfirm){
-          if (isConfirm) {
-            $('#acceptForm').submit();
-          } else {
-            swal("Cancelled", "Operation Cancelled", "error");
-          }
-        })
-	})
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+		{{ HTML::script(asset('js/moment.min.js')) }}
+		<script>
+		$('document').ready(function(){
 
-	$('#date').on('change',function(){
-		setDate("#date");
-	});
+			$('#reference').autocomplete({
+				source: "{{ url('get/purchaseorder/all') }}"
+			})
 
-	@if(Input::old('date'))
-		$('#date').val('{{ Input::old('date') }}');
-		setDate("#date");
-	@else
-		$('#date').val('{{ Carbon\Carbon::now()->toFormattedDateString() }}');
-		setDate("#date");
-	@endif
+			$( "#date" ).datepicker({
+				  changeMonth: true,
+				  changeYear: true,
+				  maxAge: 59,
+				  minAge: 15,
+			});
 
-	function setDate(object){
-			var object_val = $(object).val()
-			var date = moment(object_val).format('MMM DD, YYYY');
-			$(object).val(date);
-	}
+			$('#cancel').on('click',function(){
+				window.location.href = "{{ url("inventory/supply/$supply->stocknumber/supplyledger") }}"
+			})
 
-	@if( Session::has("success-message") )
-		swal("Success!","{{ Session::pull('success-message') }}","success");
-	@endif
+			$('#accept').on('click',function(){
+		        swal({
+		          title: "Are you sure?",
+		          text: "This will no longer be editable once submitted. Do you want to continue?",
+		          type: "warning",
+		          showCancelButton: true,
+		          confirmButtonText: "Yes, submit it!",
+		          cancelButtonText: "No, cancel it!",
+		          closeOnConfirm: false,
+		          closeOnCancel: false
+		        },
+		        function(isConfirm){
+		          if (isConfirm) {
+		            $('#acceptForm').submit();
+		          } else {
+		            swal("Cancelled", "Operation Cancelled", "error");
+		          }
+		        })
+			})
 
-	@if( Session::has("error-message") )
-		swal("Oops...","{{ Session::pull('error-message') }}","error");
-	@endif
+			$('#date').on('change',function(){
+				setDate("#date");
+			});
 
-	$('#page-body').show()
-})
+			@if(Input::old('date'))
+				$('#date').val('{{ Input::old('date') }}');
+				setDate("#date");
+			@else
+				$('#date').val('{{ Carbon\Carbon::now()->toFormattedDateString() }}');
+				setDate("#date");
+			@endif
+
+			function setDate(object){
+					var object_val = $(object).val()
+					var date = moment(object_val).format('MMM DD, YYYY');
+					$(object).val(date);
+			}
+
+			@if( Session::has("success-message") )
+				swal("Success!","{{ Session::pull('success-message') }}","success");
+			@endif
+
+			@if( Session::has("error-message") )
+				swal("Oops...","{{ Session::pull('error-message') }}","error");
+			@endif
+
+			$('#page-body').show()
+		})
 </script>
-@stop
-	
+@endsection

@@ -17,9 +17,10 @@ class SupplyLedger extends Model{
 	public static $receiptRules = array(
 	'Date' => 'required',
 	'Stock Number' => 'required',
-	'Purchase Order' => 'required',
+	'Purchase Order' => 'required|exists:purchaseorder,purchaseorderno',
 	'Receipt Quantity' => 'required',
-	'Days To Consume' => ''
+	'Receipt Unit Price' => 'required',
+	'Days To Consume' => 'max:100'
 	);
 
 	public static $issueRules = array(
@@ -27,12 +28,13 @@ class SupplyLedger extends Model{
 	'Stock Number' => 'required',
 	'Requisition and Issue Slip' => 'required',
 	'Issue Quantity' => 'required',
-	'Days To Consume' => ''
+	'Issue Unit Price' => 'required',
+	'Days To Consume' => 'max:100'
 	);
 
 	public function getDateAttribute($value)
 	{
-		return Carbon\Carbon::parse($value)->format('F Y');
+		return Carbon\Carbon::parse($value)->format('jS \\of F Y');
 	}
 
 	/*
@@ -40,9 +42,9 @@ class SupplyLedger extends Model{
 	*	Call this function when receiving an item
 	*
 	*/
-	public static function receipt($date,$stocknumber,$reference,$receiptquantity,$daystoconsume)
+	public static function receipt($date,$stocknumber,$reference,$receiptquantity,$receiptunitprice,$daystoconsume)
 	{
-			
+
 		$username = Auth::user()->firstname . " " . Auth::user()->middlename . " " . Auth::user()->lastname;
 		$date = Carbon\Carbon::parse($date);
 		DB::statement("
@@ -52,6 +54,8 @@ class SupplyLedger extends Model{
 				'$stocknumber',
 				'$reference',
 				'$receiptquantity',
+				'$receiptunitprice',
+				'0',
 				'0',
 				'$daystoconsume'
 			)
@@ -64,7 +68,7 @@ class SupplyLedger extends Model{
 	*	Call this function when releasing
 	*
 	*/
-	public static function issue($date,$stocknumber,$reference,$issuequantity,$daystoconsume)
+	public static function issue($date,$stocknumber,$reference,$issuequantity,$issueunitprice,$daystoconsume)
 	{
 		$username = Auth::user()->firstname . " " . Auth::user()->middlename . " " . Auth::user()->lastname;
 		$date = Carbon\Carbon::parse($date);
@@ -75,7 +79,9 @@ class SupplyLedger extends Model{
 				'$stocknumber',
 				'$reference',
 				'0',
+				'0',
 				'$issuequantity',
+				'$issueunitprice',
 				'$daystoconsume'
 			)
 		");
@@ -138,7 +144,7 @@ class SupplyLedger extends Model{
 	{
 		try{
 
-			$validator = Validator::make([	
+			$validator = Validator::make([
 				'Date' => $date,
 				'Stock Number' => $stocknumber,
 				'Requisition and Issue Slip' => $reference,

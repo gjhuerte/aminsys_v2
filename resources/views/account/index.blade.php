@@ -1,26 +1,38 @@
-@extends('layouts.master')
-@section('title')
-Accounts
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-<meta name="csrf-token" content="{{ csrf_token() }}">
-{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
-<link rel="stylesheet" href="{{ asset('css/style.min.css') }}" />
-<style type="text/css">
-	#page-body{
-		display: hidden;
-	}
-</style>
-@stop
+@extends('backpack::layout')
+
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		{{ HTML::style(asset('css/select.bootstrap.min.css')) }}
+		<link rel="stylesheet" href="{{ asset('css/style.min.css') }}" />
+		<style type="text/css">
+			#page-body{
+				display: none;
+			}
+		</style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Accounts</h3></legend>
+	  {{-- <ol class="breadcrumb">
+	    <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/dashboard') }}">Das</a></li>
+	    <li class="active">{{ trans('backpack::backup.backup') }}</li>
+	  </ol> --}}
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-	@include('modal.account.access')
-	<div class="col-sm-12 panel panel-default" id="account-info" style="padding-top: 20px;">
-		<div class="col-sm-12 panel-body  table-responsive">
-			<table id='userTable' class="table table-bordered table-hover table-striped table-condensed">
+@include('modal.account.access')
+<!-- Default box -->
+  <div class="box" style="padding:10px;">
+    <div class="box-body">
+			<table id='userTable' class="table table-bordered table-hover table-striped table-condensed" width=100%>
 				<thead>
 					<th>ID</th>
 					<th>Username</th>
@@ -29,25 +41,45 @@ Accounts
 					<th>Middlename</th>
 					<th>Email</th>
 					<th>Privilege</th>
+					<th>Office</th>
 				</thead>
 				<tbody></tbody>
 			</table>
-		</div>
-	</div>
-</div>
-@stop
-@section('script')
-{{ HTML::script(asset('js/dataTables.select.min.js')) }}
+
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
+
+@endsection
+
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
+
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+		{{ HTML::script(asset('js/dataTables.select.min.js')) }}
+
 <script>
 	$(document).ready(function() {
+    @if( Session::has("success-message") )
+        new PNotify({
+            title: "Success!",
+            text: "{{ Session::pull('success-message') }}",
+            type: "success"
+        });
+    @endif
+    @if( Session::has("error-message") )
+        new PNotify({
+            title: "Oops...",
+            text: "{{ Session::pull('error-message') }}",
+            type: "warning"
+        });
+    @endif
 
-		@if( Session::has("success-message") )
-		  swal("Success!","{{ Session::pull('success-message') }}","success");
-		@endif
-		@if( Session::has("error-message") )
-		  swal("Oops...","{{ Session::pull('error-message') }}","error");
-		@endif
-		
 	  	var table = $('#userTable').DataTable({
 			"pageLength": 100,
 	  		select: {
@@ -56,7 +88,7 @@ Accounts
 		    language: {
 		        searchPlaceholder: "Search..."
 		    },
-	    	"dom": "<'row'<'col-sm-9'<'toolbar'>><'col-sm-3'f>>" +
+	    	"dom": "<'row'<'col-sm-9'l<'toolbar'>><'col-sm-3'f>>" +
 						    "<'row'<'col-sm-12'tr>>" +
 						    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
 			"processing": true,
@@ -70,28 +102,52 @@ Accounts
 			  { data: "email" },
 			  { data: function(param){
 			  	if(param.accesslevel == 0){
-			  		return 'AMO';
+			  		return 'Administator';
 			  	}
 
 			  	if(param.accesslevel == 1){
+			  		return 'AMO';
+			  	}
+
+			  	if(param.accesslevel == 2){
 			  		return 'Accounting';
 			  	}
 
-
-			  	if(param.accesslevel == 2){
-			  		return 'Administator';
+			  	if(param.accesslevel == 3){
+			  		return 'Offices';
 			  	}
 			  }},
+				{ data: "office" }
 			],
     	});
 
 	 	$("div.toolbar").html(`
  			<button id="new" class="btn btn-primary btn-flat" style="margin-right:5px;padding: 5px 10px;" data-target="reservationItemsAddModal" data-toggle="modal"><span class="glyphicon glyphicon-plus"></span>  New</button>
- 			<button id="edit" class="btn btn-default btn-flat" style="margin-right:5px;padding: 6px 10px;"><span class="glyphicon glyphicon-pencil"></span>  Update</button>
- 			<button id="access" class="btn btn-success btn-flat" style="margin-right:5px;padding: 5px 10px;"><span class="glyphicon glyphicon-task"></span> Change Access Level</button>
- 			<button id="reset" class="btn btn-info btn-flat" style="margin-right:5px;padding: 5px 10px;"><span class="glyphicon glyphicon"></span> Reset Password</button>
- 			<button id="delete" class="btn btn-danger btn-flat" style="margin-right:5px;padding: 5px 10px;"><span class="glyphicon glyphicon-trash"></span> Remove</button>
+ 			<button id="edit" class="btn btn-default btn-flat" style="margin-right:5px;padding: 6px 10px;" style="display:none;"><span class="glyphicon glyphicon-pencil"></span>  Update</button>
+ 			<button id="access" class="btn btn-success btn-flat" style="margin-right:5px;padding: 5px 10px;" style="display:none;"><span class="glyphicon glyphicon-task"></span> Change Access Level</button>
+ 			<button id="reset" class="btn btn-info btn-flat" style="margin-right:5px;padding: 5px 10px;" style="display:none;"><span class="glyphicon glyphicon"></span> Reset Password</button>
+ 			<button id="delete" class="btn btn-danger btn-flat" style="margin-right:5px;padding: 5px 10px;" style="display:none;"><span class="glyphicon glyphicon-trash"></span> Remove</button>
 		`);
+
+    // table
+    //     .on( 'select', function ( e, dt, type, indexes ) {
+    //         // var rowData = table.rows( indexes ).data().toArray();
+    //         // events.prepend( '<div><b>'+type+' selection</b> - '+JSON.stringify( rowData )+'</div>' );
+    //         $('#edit').show()
+    //         $('#access').show()
+    //         $('#activate').show()
+    //         $('#reset').show()
+    //         $('#delete').show()
+    //     } )
+    //     .on( 'deselect', function ( e, dt, type, indexes ) {
+    //         // var rowData = table.rows( indexes ).data().toArray();
+    //         // events.prepend( '<div><b>'+type+' <i>de</i>selection</b> - '+JSON.stringify( rowData )+'</div>' );
+    //         $('#edit').hide()
+    //         $('#access').hide()
+    //         $('#activate').hide()
+    //         $('#reset').hide()
+    //         $('#delete').hide()
+    //     } );
 
 	    $('#new').on('click',function(){
 	    	window.location.href = "{{ url('account/create') }}"
@@ -102,22 +158,25 @@ Accounts
 				if(table.row('.selected').data().id != null && table.row('.selected').data().id  && table.row('.selected').data().id >= 0)
 				{
 					$('#accesslevel-id').val(table.row('.selected').data().id)
-					$('#accesslevel-name').val(table.row('.selected').data().firstname + " " + 
-					table.row('.selected').data().middlename + " " + 
+					$('#accesslevel-name').val(table.row('.selected').data().firstname + " " +
+					table.row('.selected').data().middlename + " " +
 					table.row('.selected').data().lastname)
 					$('#accesslevel-oldaccesslevel').val(
 						function(){
 						  	if(table.row('.selected').data().accesslevel == 0){
-						  		return 'AMO';
+						  		return 'Administrator';
 						  	}
 
 						  	if(table.row('.selected').data().accesslevel == 1){
+						  		return 'AMO';
+						  	}
+
+						  	if(table.row('.selected').data().accesslevel == 2){
 						  		return 'Accounting';
 						  	}
 
-
-						  	if(table.row('.selected').data().accesslevel == 2){
-						  		return 'Administrator';
+						  	if(table.row('.selected').data().accesslevel == 3){
+						  		return 'Offices';
 						  	}
 						})
 	    			$('#changeAccessLevelModal').modal('show');
@@ -236,4 +295,4 @@ Accounts
 		$('#page-body').show();
 	} );
 </script>
-@stop
+@endsection

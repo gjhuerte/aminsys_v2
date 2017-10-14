@@ -10,18 +10,18 @@ class SupplyTransaction extends Model{
 	protected $table = 'supplytransaction';
 
 	public $timestamps = true;
-	protected $fillable = ['user_id','date','stocknumber','purchaseorderno','reference','receiptquantity','issuequantity','office','daystoconsume'];	
+	protected $fillable = ['user_id','date','stocknumber','purchaseorderno','reference','receiptquantity','issuequantity','office','daystoconsume'];
 	protected $primaryKey = 'id';
 
 	// set of rules when receiving an item
 	public static $receiptRules = array(
 		'Date' => 'required',
 		'Stock Number' => 'required',
-		'Purchase Order' => 'required',
+		'Purchase Order' => 'required|exists:purchaseorder,purchaseorderno',
 		'Delivery Receipt' => '',
 		'Office' => '',
 		'Receipt Quantity' => 'required|integer',
-		'Days To Consume' => ''
+		'Days To Consume' => 'max:100'
 	);
 
 	//set of rules when issuing the item
@@ -31,7 +31,7 @@ class SupplyTransaction extends Model{
 		'Requisition and Issue Slip' => 'required',
 		'Office' => '',
 		'Issue Quantity' => 'required|integer',
-		'Days To Consume' => ''
+		'Days To Consume' => 'max:100'
 	);
 
 	/*
@@ -63,7 +63,7 @@ class SupplyTransaction extends Model{
 	*/
 	public static function receipt($date,$stocknumber,$purchaseorderno,$reference,$office,$receiptquantity,$daystoconsume)
 	{
-			
+
 		$username = Auth::user()->firstname . " " . Auth::user()->middlename . " " . Auth::user()->lastname;
 		$date = Carbon\Carbon::parse($date);
 		DB::statement("
@@ -111,4 +111,3 @@ class SupplyTransaction extends Model{
 	}
 
 }
-	

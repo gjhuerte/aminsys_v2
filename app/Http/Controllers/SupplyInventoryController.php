@@ -1,6 +1,6 @@
 <?php
 namespace App\Http\Controllers;
-	
+
 use App\Supply;
 use App\SupplyTransaction;
 use Carbon;
@@ -24,7 +24,8 @@ class SupplyInventoryController extends Controller {
 				'data' => Supply::all()
 			]);
 		}
-		return view('inventory.supply.index');
+		return view('inventory.supply.index')
+                ->with('title','Supply Inventory');
 	}
 
 	public function getSupplyWithRemainingBalance($stocknumber)
@@ -41,7 +42,7 @@ class SupplyInventoryController extends Controller {
 									DB::raw('sum(issuequantity) as totalissuequantity')
 									)
 								->get()
-			]);	
+			]);
 		}
 	}
 
@@ -53,7 +54,8 @@ class SupplyInventoryController extends Controller {
 	 */
 	public function create()
 	{
-		return view('inventory.supply.create');
+		return view('inventory.supply.create')
+                ->with('title','Supply Inventory');
 	}
 
 
@@ -96,7 +98,7 @@ class SupplyInventoryController extends Controller {
 		$supply->reorderpoint = $reorderpoint;
 		$supply->save();
 
-		Session::flash('success-message','Supplies added to inventory.supply');
+		Session::flash('success-message','Supplies added to Supply Inventory');
 		return redirect('inventory.supply');
 	}
 
@@ -121,7 +123,7 @@ class SupplyInventoryController extends Controller {
 	 */
 	public function edit($id)
 	{
-		
+
 	}
 
 

@@ -26,7 +26,8 @@ class AuditTrailController extends Controller
             ]);
         }
 
-        return view('audittrail.index');
+        return view('audittrail.index')
+            ->with('title','Audit Trail');
     }
 
     /**

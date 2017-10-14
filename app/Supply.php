@@ -26,6 +26,31 @@ class Supply extends Model{
 	'Reorder Point' => 'integer'
 	);
 
+	protected $appends = [
+		'balance'
+	];
+
+	public function getBalanceAttribute()
+	{
+		$stocknumber = '';
+		if(isset($this->stocknumber))
+		{
+			$stocknumber = $this->stocknumber;
+		}
+
+		$balance = SupplyTransaction::where('stocknumber','=',$stocknumber)
+						->orderBy('created_at','desc')
+						->pluck('balancequantity')
+						->first();
+
+		if(empty($balance) || $balance == null || $balance == '')
+		{
+			$balance = 0;
+		}
+
+		return $balance	;
+	}
+
 	public function supplytransaction()
 	{
 		return $this->hasMany('App\SupplyTransaction');

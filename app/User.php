@@ -4,11 +4,15 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Illuminate\Auth\Authenticatable as AuthenticableTrait;
+use OwenIt\Auditing\Contracts\UserResolver;
 
-class User extends \Eloquent implements Authenticatable
+class User extends \Eloquent implements Authenticatable, AuditableContract, UserResolver
 {
 	use AuthenticableTrait;
+  use Auditable;
 
 	//Database driver
 	/*
@@ -18,7 +22,7 @@ class User extends \Eloquent implements Authenticatable
 
 	//The table in the database used by the model.
 	protected $table  = 'user';
-	
+
 	//The attribute that used as primary key.
 	protected $primaryKey = 'id';
 
@@ -34,7 +38,8 @@ class User extends \Eloquent implements Authenticatable
 		'Firstname' => 'required|between:2,100|string',
 		'Middlename' => 'min:2|max:50|string',
 		'Lastname' => 'required|min:2|max:50|string',
-		'Email' => 'email'
+		'Email' => 'email',
+		'Office' => 'required|exists:office,deptcode'
 	);
 	public static $informationRules = array(
 		'Firstname' => 'required|between:2,100|string',
@@ -54,7 +59,8 @@ class User extends \Eloquent implements Authenticatable
 		'First name' => 'min:2|max:100|string',
 		'Middle name' => 'min:2|max:50|string',
 		'Last name' => 'min:2|max:50|string',
-		'Email' => 'email'
+		'Email' => 'email',
+		'Office' => 'required|exists:office,deptcode'
 	);
 
 
@@ -83,5 +89,19 @@ class User extends \Eloquent implements Authenticatable
 		{
 		 parent::setAttribute($key, $value);
 		}
+	}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function resolveId()
+  {
+      return Auth::check() ? Auth::user()->getAuthIdentifier() : null;
+  }
+
+
+	public function office()
+	{
+		return $this->belongsTo('App\Office','office','deptcode');
 	}
 }

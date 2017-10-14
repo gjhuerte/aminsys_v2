@@ -54,8 +54,17 @@ class CreateTransactiontriggerTable extends Migration
                 END'
                 );
         DB::unprepared('
-  CREATE DEFINER=`root`@`localhost` PROCEDURE `ledger_update`(IN `_user_id` VARCHAR(100), IN `_date` DATE, IN `_stocknumber` VARCHAR(100), IN `_reference` VARCHAR(100), IN `_receipt` INT(11), IN `_issue` INT(11), IN `_daystoconsume` VARCHAR(100))
-                        NO SQL
+                    CREATE DEFINER=`root`@`localhost` PROCEDURE `ledger_update`(
+                      IN `_user_id` VARCHAR(100), 
+                      IN `_date` DATE, 
+                      IN `_stocknumber` VARCHAR(100), 
+                      IN `_reference` VARCHAR(100), 
+                      IN `_receipt` INT(11), 
+                      IN `_receiptprice` DECIMAL, 
+                      IN `_issue` INT(11), 
+                      IN `_issueprice` DECIMAL, 
+                      IN `_daystoconsume` VARCHAR(100))
+                    NO SQL
                     BEGIN
 
                     SET @endbalance = (
@@ -65,40 +74,36 @@ class CreateTransactiontriggerTable extends Migration
                             ORDER BY date DESC , id DESC
                             LIMIT 1
                         );
-                        
+                    /* last receiptprice inserted*/
+                    SET @endreceiptprice = (
+                            SELECT receiptunitprice 
+                            FROM supplyledger 
+                            WHERE date <= _date AND stocknumber = _stocknumber
+                            ORDER BY date DESC , id DESC
+                            LIMIT 1
+                        );
+                    /*for issue*/
+                    IF _receiptprice IS NULL OR _receiptprice = 0 THEN
+                    SET _receiptprice = _issueprice;
+                    END IF;
+
+                    /*for receipt*/
+                    IF _issueprice IS NULL OR _issueprice = 0 THEN
+                    SET _issueprice = _receiptprice;
+                    END IF;
+
+                    /* last issueprice inserted*/
+                    SET @endissueprice = (
+                            SELECT issueunitprice 
+                            FROM supplyledger 
+                            WHERE date <= _date AND stocknumber = _stocknumber
+                            ORDER BY date DESC , id DESC
+                            LIMIT 1
+                        );    
                     IF @endbalance IS null THEN
                         SET @endbalance = 0; 
                     END IF;
-                    
-
-                    SET @reference = (
-                                    SELECT purchaseorderno
-                                    FROM purchaseorder_supply
-                                    WHERE supplyitem = _stocknumber
-                                    LIMIT 1
-                                     );
-
-                    SET @price2 = (
-                            SELECT AVG(unitprice) 
-                            FROM purchaseorder_supply 
-                            WHERE supplyitem = _stocknumber
-                        );
-                        
-                    IF @price2 IS NULL THEN
-                        SET @price2 = 0;
-                    END IF;
-
-                    IF _receipt IS NOT NULL OR _receipt != 0 THEN
-                    SET @price = (
-                            SELECT unitprice 
-                            FROM purchaseorder_supply 
-                            WHERE supplyitem = _stocknumber
-                            LIMIT 1                 
-                        );
-                    ELSE
-                    SET @price = @price2;
-                    END IF;
-
+                  
                     SET @balance = @endbalance +_receipt - _issue;
 
                     INSERT INTO supplyledger VALUES(
@@ -108,9 +113,9 @@ class CreateTransactiontriggerTable extends Migration
                         _stocknumber,
                         _reference,
                         _receipt,
-                        @price,
+                        _receiptprice,
                         _issue,
-                        @price2,
+                        _issueprice,
                         @balance,
                         _daystoconsume,
                         NOW(),

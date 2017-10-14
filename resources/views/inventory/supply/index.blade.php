@@ -1,48 +1,75 @@
-@extends('layouts.master')
-@section('title')
-Supply Inventory
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-	#page-body{
-		display: none;
-	}
+@extends('backpack::layout')
 
-	a > hover{
-		text-decoration: none;
-	}
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+		<style>
+			#page-body{
+				display: none;
+			}
 
-	th , tbody{
-		text-align: center;
-	}
-</style>
-@stop
+			a > hover{
+				text-decoration: none;
+			}
+
+			th , tbody{
+				text-align: center;
+			}
+		</style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+		<legend><h3 class="text-muted">Supplies Inventory</h3></legend>
+	  {{-- <ol class="breadcrumb">
+	    <li><a href="{{ url(config('backpack.base.route_prefix', 'admin').'/dashboard') }}">Das</a></li>
+	    <li class="active">{{ trans('backpack::backup.backup') }}</li>
+	  </ol> --}}
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-	<div class="col-md-12">
+<!-- Default box -->
+  <div class="box">
+    <div class="box-body">
 		<div class="panel panel-body table-responsive">
-			<legend><h3 class="text-muted">Supplies Inventory</h3></legend>
-			<table class="table table-hover table-striped table-bordered table-condensed" id="supplyInventoryTable">
-				<thead>
-					<th>Stock No.</th>
-					<th>Supply Item</th>
-					<th>Unit</th>
-					<th>Reorder Point</th>
-					@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
-					<th></th>
-					@endif
-				</thead>
-			</table>
+		<table class="table table-hover table-striped table-bordered table-condensed" id="supplyInventoryTable">
+			<thead>
+				<th class="col-sm-1">Stock No.</th>
+				<th class="col-sm-1">Supply Item</th>
+				<th class="col-sm-1">Unit</th>
+				<th class="col-sm-1">Reorder Point</th>
+				<th class="col-sm-1">Remaining Balance</th>
+				@if(Auth::user()->accesslevel == 1 || Auth::user()->accesslevel == 2)
+				<th class="col-sm-1"></th>
+				@endif
+			</thead>
+		</table>
 		</div>
-	</div>
-</div>
-@stop
-@section('script')
-<script type="text/javascript">
+
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
+
+@endsection
+
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
+
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+
+<script>
 	$(document).ready(function() {
 
 		@if( Session::has("success-message") )
@@ -59,8 +86,8 @@ Supply Inventory
 			language: {
 					searchPlaceholder: "Search..."
 			},
-			@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
-			"dom": "<'row'<'col-sm-9'<'toolbar'>><'col-sm-3'f>>" +
+			@if(Auth::user()->accesslevel == 1 || Auth::user()->accesslevel == 2)
+			"dom": "<'row'<'col-sm-3'l><'col-sm-6'<'toolbar'>><'col-sm-3'f>>" +
 							"<'row'<'col-sm-12'tr>>" +
 							"<'row'<'col-sm-5'i><'col-sm-7'p>>",
 			@endif
@@ -71,13 +98,14 @@ Supply Inventory
 					{ data: "supplytype" },
 					{ data: "unit" },
 					{ data: "reorderpoint" },
-					@if(Auth::user()->accesslevel == 0 || Auth::user()->accesslevel == 1)
+					{ data: "balance" },
+					@if(Auth::user()->accesslevel == 1 || Auth::user()->accesslevel == 2)
 		            { data: function(callback){
 		            	return `
-		            			@if(Auth::user()->accesslevel == 0)
+		            			@if(Auth::user()->accesslevel == 1)
 		            			<a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/stockcard' +`" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-list"></span> Stockcard</a>
 		            			@endif
-		            			@if(Auth::user()->accesslevel == 1)
+		            			@if(Auth::user()->accesslevel == 2)
 		            			<a href="{{ url("inventory/supply") }}` + '/' + callback.stocknumber  + '/supplyledger' +`" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-list"></span> Supply Ledger</a>
 		            			@endif
 		            	`;
@@ -86,7 +114,7 @@ Supply Inventory
 			],
 	    });
 
-	    @if(Auth::user()->accesslevel == 1)
+	    @if(Auth::user()->accesslevel == 2)
 	 	$("div.toolbar").html(`
 				<button id="accept" class="btn btn-sm btn-success">
 					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
@@ -99,7 +127,7 @@ Supply Inventory
 		`);
 		@endif
 
-		@if(Auth::user()->accesslevel == 0)
+		@if(Auth::user()->accesslevel == 1)
 	 	$("div.toolbar").html(`
 			<button id="accept" class="btn btn-sm btn-success">
 				<span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
@@ -113,17 +141,17 @@ Supply Inventory
 		@endif
 
 		$('#accept').on("click",function(){
-			@if(Auth::user()->accesslevel == 0)
+			@if(Auth::user()->accesslevel == 1)
 			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/accept') }}"
-			@elseif(Auth::user()->accesslevel == 1)
+			@elseif(Auth::user()->accesslevel == 2)
 			window.location.href = "{{ url('inventory/supply/supplyledger/batch/form/accept') }}"
 			@endif
 		});
 
 		$('#release').on('click',function(){
-			@if(Auth::user()->accesslevel == 0)
+			@if(Auth::user()->accesslevel == 1)
 			window.location.href = "{{ url('inventory/supply/stockcard/batch/form/release') }}"
-			@elseif(Auth::user()->accesslevel == 1)
+			@elseif(Auth::user()->accesslevel == 2)
 			window.location.href = "{{ url('inventory/supply/supplyledger/batch/form/release') }}"
 			@endif
 
@@ -132,5 +160,4 @@ Supply Inventory
 		$('#page-body').show();
 	} );
 </script>
-@stop
-	
+@endsection

@@ -1,44 +1,50 @@
-@extends('layouts.master')
-@section('title')
-Accounts
-@stop
-@section('navbar')
-@include('layouts.navbar')
-@stop
-@section('style')
-<link rel="stylesheet" href="{{ asset('css/style.css') }}" />
-<style>
-  #page-body{
-    display:none;
-  }
-</style>
-@stop
+@extends('backpack::layout')
+
+@section('after_styles')
+    <!-- Ladda Buttons (loading buttons) -->
+    <link href="{{ asset('vendor/backpack/ladda/ladda-themeless.min.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+    <style>
+      #page-body{
+        display: none;
+      }
+    </style>
+
+    <!-- Bootstrap -->
+    {{ HTML::style(asset('css/jquery-ui.css')) }}
+    {{ HTML::style(asset('css/sweetalert.css')) }}
+    {{ HTML::style(asset('css/dataTables.bootstrap.min.css')) }}
+@endsection
+
+@section('header')
+	<section class="content-header">
+    <legend><h3 class="text-muted">Account Update</h3></legend>
+      <ol class="breadcrumb">
+          <li><a href="{{ url('account') }}">Account</a></li>
+          <li class="active">{{ $user->username }}</li>
+          <li class="active">Update</li>
+      </ol>
+	</section>
+@endsection
+
 @section('content')
-<div class="container-fluid" id="page-body">
-  <div class="col-md-offset-3 col-md-6">
-    <div class="panel panel-body " style="padding: 35px;">
-        @if (count($errors) > 0)
-           <div class="alert alert-danger alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <ul class="list-unstyled" style='margin-left: 10px;'>
-                    @foreach ($errors->all() as $error)
-                        <li class="text-capitalize">{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-      <div class='col-md-12'>
-  			<ol class="breadcrumb">
-  			  <li><a href="{{ url('account') }}">Account</a></li>
-    			  <li><a href="{{ url('account/view/update') }}">Update</a></li>
-  			  <li class="active">{{ $user->id }}</li>
-  			</ol>
-      </div>
-      <div class="col-md-12">
+<!-- Default box -->
+  <div class="box" style="padding:10px;">
+    <div class="box-body">
           {{ Form::model($user,array('route'=>array('account.update',$user->id),'method'=>'PUT',
-            'class' => 'form-horizontal',
+            'class' => 'col-sm-offset-3 col-sm-6 form-horizontal',
             'id' => 'updateForm'
           )) }}
+              @if (count($errors) > 0)
+                 <div class="alert alert-danger alert-dismissible" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <ul class="list-unstyled" style='margin-left: 10px;'>
+                          @foreach ($errors->all() as $error)
+                              <li class="text-capitalize">{{ $error }}</li>
+                          @endforeach
+                      </ul>
+                  </div>
+              @endif
           <div class="form-group">
             <div class="col-md-12">
             {{ Form::label('username','Username') }}
@@ -92,28 +98,68 @@ Accounts
           </div>
           <div class="form-group">
             <div class="col-md-12">
+            {{ Form::label('office','Office') }}
+            {{ Form::select('office',$office,Input::old('office'),[
+              'class'=>'form-control'
+            ]) }}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-12">
             {{  Form::submit('Update',[
               'class' => 'btn btn-lg btn-primary btn-block'
             ]) }}
             </div>
           </div>
         {{ Form::close() }}
-      </div>
-    </div><!-- Row -->
-  </div>
-</div><!-- Container -->
-@stop
-@section('script')
-<script type="text/javascript">
-  $(document).ready(function(){
 
-    $( "#updateForm" ).validate( {
+    </div><!-- /.box-body -->
+  </div><!-- /.box -->
+
+@endsection
+
+@section('after_scripts')
+    <!-- Ladda Buttons (loading buttons) -->
+    <script src="{{ asset('vendor/backpack/ladda/spin.js') }}"></script>
+    <script src="{{ asset('vendor/backpack/ladda/ladda.js') }}"></script>
+
+    {{ HTML::script(asset('js/jquery-ui.js')) }}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {{ HTML::script(asset('js/sweetalert.min.js')) }}
+    {{ HTML::script(asset('js/jquery.dataTables.min.js')) }}
+    {{ HTML::script(asset('js/dataTables.bootstrap.min.js')) }}
+    <script type="text/javascript" src="{{ asset('js/jquery.validate.min.js') }}"></script>
+
+<script>
+  $(document).ready(function(){
+    @if( Session::has("success-message") )
+      swal("Success!","{{ Session::pull('success-message') }}","success");
+    @endif
+    @if( Session::has("error-message") )
+      swal("Oops...","{{ Session::pull('error-message') }}","error");
+    @endif
+
+    $( "#registrationForm" ).validate( {
       rules: {
         firstname: "required",
         lastname: "required",
         username: {
           required: true,
           minlength: 4
+        },
+        password: {
+          required: true,
+          minlength: 8
+        },
+        confirm: {
+          required: true,
+          minlength: 8,
+          equalTo: "#password"
+        },
+        contactnumber: {
+          required: true,
+          minlength: 11,
+          maxlength: 11
         },
         email: {
           required: true,
@@ -126,6 +172,20 @@ Accounts
         username: {
           required: "Please enter a username",
           minlength: "Your username must consist of at least 4 characters"
+        },
+        password: {
+          required: "Please provide a password",
+          minlength: "Your password must be at least 8 characters long"
+        },
+        confirm: {
+          required: "Please provide a password",
+          minlength: "Your password must be at least 8 characters long",
+          equalTo: "Please enter the same password as above"
+        },
+        contactnumber: {
+          required: "Please provide your contact number",
+          minlength: "Contact Number must be 11-digit",
+          minlength: "Contact Number must be 11-digit"
         },
         email: "Please enter a valid email address"
       },
@@ -171,7 +231,7 @@ Accounts
           if (isConfirm) {
             form.submit();
           } else {
-            swal("Cancelled", "Registration Cancelled", "error");
+            swal("Cancelled", "Operation Cancelled", "error");
           }
         })
       },
@@ -185,21 +245,7 @@ Accounts
       }
     } );
 
-    $('#hide').click(function(){
-      $('#password-reset').hide();
-    });
-
-    @if( Session::has("success-message") )
-      swal("Success!","{{ Session::pull('success-message') }}","success");
-    @endif
-    @if( Session::has("error-message") )
-      swal("Oops...","{{ Session::pull('error-message') }}","error");
-    @endif
-
     $('#page-body').show();
   });
 </script>
-@stop
-@section('script-include')
-<script type="text/javascript" src="{{ asset('js/jquery.validate.min.js') }}"></script>
-@stop
+@endsection

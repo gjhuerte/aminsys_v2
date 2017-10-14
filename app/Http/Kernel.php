@@ -51,6 +51,7 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'admin' => \App\Http\Middleware\AdministratorFilter::class,
+        'offices' => \App\Http\Middleware\OfficesAccessOnly::class,
         'amo' => \App\Http\Middleware\AMOFilter::class,
         'accounting' => \App\Http\Middleware\AccountingFilter::class,
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,

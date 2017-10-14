@@ -16,7 +16,7 @@ class AdministratorFilter
      */
     public function handle($request, Closure $next)
     {
-        if(Auth::user()->accesslevel != 2 )
+        if(Auth::user()->accesslevel != 0 )
         {
             return redirect('/');
         }

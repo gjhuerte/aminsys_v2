@@ -17,15 +17,9 @@
       </div>
       <div class="modal-body">
         {{ Form::open(['method'=>'PUT','route'=>('account.accesslevel.update')]) }}
-        <div class="form-group">
-          {{ Form::label('accesslevel-id','ID') }}
-          {{ Form::text('id',null,[
-            'class'=>'form-control',
-            'style' => 'background-color: white;',
-            'id' => 'accesslevel-id',
-            'readonly'
+          {{ Form::hidden('id',null,[
+            'id' => 'accesslevel-id'
           ]) }}
-        </div>
         <div class="form-group">
           {{ Form::label('accesslevel-name','Name') }}
           {{ Form::text('name',null,[
@@ -50,7 +44,7 @@
             <li class="list-group-item">
               <div class="radio">
                 <label>
-                  <input type="radio" name="newaccesslevel" value="0">
+                  <input type="radio" name="newaccesslevel" value="1">
                   AMO
                 </label>
               </div>
@@ -58,8 +52,16 @@
             <li class="list-group-item">
               <div class="radio">
                 <label>
-                  <input type="radio" name="newaccesslevel" value="1">
+                  <input type="radio" name="newaccesslevel" value="2">
                   Accounting
+                </label>
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="radio">
+                <label>
+                  <input type="radio" name="newaccesslevel" value="3">
+                  Offices
                 </label>
               </div>
             </li>
